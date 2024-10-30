@@ -1,10 +1,10 @@
 use cwise_db;
 
-drop table if exists user;
-drop table if exists department;
-drop table if exists course;
-drop table if exists professor;
-drop table if exists review;
+DROP TABLE IF EXISTS review;
+DROP TABLE IF EXISTS course;
+DROP TABLE IF EXISTS professor;
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS department;
 
 
 CREATE TABLE user (
@@ -17,14 +17,14 @@ CREATE TABLE user (
 
 CREATE TABLE department (
   `did` int PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(30)
+  `name` varchar(60)
 );
 
 CREATE TABLE course (
   `cid` int PRIMARY KEY AUTO_INCREMENT,
   `did` int,
   `course_code` varchar(10),
-  `name` varchar(30)
+  `name` varchar(60)
 );
 
 CREATE TABLE professor (
