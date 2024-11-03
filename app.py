@@ -26,7 +26,7 @@ def display_course(course_code):
     return render_template('course_reviews.html', page_title='Course Reviews')
 
 @app.route('/profile/')
-def display_course():
+def profile():
     return render_template('profile.html', page_title='Profile')
 
 
