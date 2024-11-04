@@ -22,74 +22,80 @@
 {% endwith %}
             
 {% block nav %}
-<form class="search" method="GET" action="{{url_for('select_department')}}">
-  <label for="department">Select a department:</label>
-  <select name="department" id="department">
-    <option value="All Department">All Departments</option>
-    <option value="Africana Studies">Africana Studies</option>
-    <option value="American Studies">American Studies</option>
-    <option value="Anthropology">Anthropology</option>
-    <option value="Arabic">Arabic</option>
-    <option value="Art Department">Art Department</option>
-    <option value="Art History">Art History</option>
-    <option value="Art-Studio">Art-Studio</option>
-    <option value="Astronomy">Astronomy</option>
-    <option value="Biochemistry">Biochemistry</option>
-    <option value="Biological Sciences">Biological Sciences</option>
-    <option value="Chemistry">Chemistry</option>
-    <option value="Chinese Language and Culture">Chinese Language and Culture</option>
-    <option value="Cinema and Media Studies">Cinema and Media Studies</option>
-    <option value="Classical Civilization">Classical Civilization</option>
-    <option value="Classical Studies Department">Classical Studies Department</option>
-    <option value="Cognitive and Linguistic Sci">Cognitive and Linguistic Sci</option>
-    <option value="Comparative Literature">Comparative Literature</option>
-    <option value="Computer Science">Computer Science</option>
-    <option value="East Asian Languages and Cultures">East Asian Languages and Cultures</option>
-    <option value="Economics">Economics</option>
-    <option value="Education">Education</option>
-    <option value="Engineering">Engineering</option>
-    <option value="English">English</option>
-    <option value="Environmental Studies">Environmental Studies</option>
-    <option value="French">French</option>
-    <option value="Geosciences">Geosciences</option>
-    <option value="German">German</option>
-    <option value="Greek">Greek</option>
-    <option value="Hindi/Urdu">Hindi/Urdu</option>
-    <option value="History">History</option>
-    <option value="Italian Studies">Italian Studies</option>
-    <option value="Japanese Language and Culture">Japanese Language and Culture</option>
-    <option value="Jewish Studies">Jewish Studies</option>
-    <option value="Korean Language and Culture">Korean Language and Culture</option>
-    <option value="Latin">Latin</option>
-    <option value="Latin American Studies">Latin American Studies</option>
-    <option value="Linguistics">Linguistics</option>
-    <option value="Mathematics">Mathematics</option>
-    <option value="Media Arts & Sciences">Media Arts & Sciences</option>
-    <option value="Medieval/Ren Studies">Medieval/Ren Studies</option>
-    <option value="Middle Eastern Studies">Middle Eastern Studies</option>
-    <option value="Music">Music</option>
-    <option value="Neuroscience">Neuroscience</option>
-    <option value="Peace and Justice Studies">Peace and Justice Studies</option>
-    <option value="Philosophy">Philosophy</option>
-    <option value="Physical Education">Physical Education</option>
-    <option value="Physics">Physics</option>
-    <option value="Political Science">Political Science</option>
-    <option value="Portuguese">Portuguese</option>
-    <option value="Psychology">Psychology</option>
-    <option value="Quantitative Reasoning">Quantitative Reasoning</option>
-    <option value="Religion">Religion</option>
-    <option value="Russian">Russian</option>
-    <option value="Russian Area Studies">Russian Area Studies</option>
-    <option value="Sociology">Sociology</option>
-    <option value="South Asia Studies Program">South Asia Studies Program</option>
-    <option value="Spanish">Spanish</option>
-    <option value="Statistics">Statistics</option>
-    <option value="Theatre Studies">Theatre Studies</option>
-    <option value="Women's and Gender Studies">Women's and Gender Studies</option>
-    <option value="Writing">Writing</option>
-  </select>
-  <input type="submit" value="search"></p>
-</form>
+<nav class="navbar">
+  <a href="{{url_for('home')}}" class="nav-button">Home</a>
+  <form class="nav-dropdown" method="GET" action="{{url_for('select_department')}}">
+    <label for="department">Select a department:</label>
+    <select name="department" id="department">
+      <option value="All Department">All Departments</option>
+      <option value="Africana Studies">Africana Studies</option>
+      <option value="American Studies">American Studies</option>
+      <option value="Anthropology">Anthropology</option>
+      <option value="Arabic">Arabic</option>
+      <option value="Art Department">Art Department</option>
+      <option value="Art History">Art History</option>
+      <option value="Art-Studio">Art-Studio</option>
+      <option value="Astronomy">Astronomy</option>
+      <option value="Biochemistry">Biochemistry</option>
+      <option value="Biological Sciences">Biological Sciences</option>
+      <option value="Chemistry">Chemistry</option>
+      <option value="Chinese Language and Culture">Chinese Language and Culture</option>
+      <option value="Cinema and Media Studies">Cinema and Media Studies</option>
+      <option value="Classical Civilization">Classical Civilization</option>
+      <option value="Classical Studies Department">Classical Studies Department</option>
+      <option value="Cognitive and Linguistic Sci">Cognitive and Linguistic Sci</option>
+      <option value="Comparative Literature">Comparative Literature</option>
+      <option value="Computer Science">Computer Science</option>
+      <option value="East Asian Languages and Cultures">East Asian Languages and Cultures</option>
+      <option value="Economics">Economics</option>
+      <option value="Education">Education</option>
+      <option value="Engineering">Engineering</option>
+      <option value="English">English</option>
+      <option value="Environmental Studies">Environmental Studies</option>
+      <option value="French">French</option>
+      <option value="Geosciences">Geosciences</option>
+      <option value="German">German</option>
+      <option value="Greek">Greek</option>
+      <option value="Hindi/Urdu">Hindi/Urdu</option>
+      <option value="History">History</option>
+      <option value="Italian Studies">Italian Studies</option>
+      <option value="Japanese Language and Culture">Japanese Language and Culture</option>
+      <option value="Jewish Studies">Jewish Studies</option>
+      <option value="Korean Language and Culture">Korean Language and Culture</option>
+      <option value="Latin">Latin</option>
+      <option value="Latin American Studies">Latin American Studies</option>
+      <option value="Linguistics">Linguistics</option>
+      <option value="Mathematics">Mathematics</option>
+      <option value="Media Arts & Sciences">Media Arts & Sciences</option>
+      <option value="Medieval/Ren Studies">Medieval/Ren Studies</option>
+      <option value="Middle Eastern Studies">Middle Eastern Studies</option>
+      <option value="Music">Music</option>
+      <option value="Neuroscience">Neuroscience</option>
+      <option value="Peace and Justice Studies">Peace and Justice Studies</option>
+      <option value="Philosophy">Philosophy</option>
+      <option value="Physical Education">Physical Education</option>
+      <option value="Physics">Physics</option>
+      <option value="Political Science">Political Science</option>
+      <option value="Portuguese">Portuguese</option>
+      <option value="Psychology">Psychology</option>
+      <option value="Quantitative Reasoning">Quantitative Reasoning</option>
+      <option value="Religion">Religion</option>
+      <option value="Russian">Russian</option>
+      <option value="Russian Area Studies">Russian Area Studies</option>
+      <option value="Sociology">Sociology</option>
+      <option value="South Asia Studies Program">South Asia Studies Program</option>
+      <option value="Spanish">Spanish</option>
+      <option value="Statistics">Statistics</option>
+      <option value="Theatre Studies">Theatre Studies</option>
+      <option value="Women's and Gender Studies">Women's and Gender Studies</option>
+      <option value="Writing">Writing</option>
+    </select>
+    <input type="submit" value="search"></p>
+  </form>
+  <div class="nav-right">
+    <a href="{{url_for('profile')}}" class="nav-button">Profile</a>
+  </div>
+</nav>
 {% endblock %}
 
 {% block main_content %}
