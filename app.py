@@ -19,10 +19,28 @@ def home():
 
 @app.route('/department/')
 def select_department():
-    return render_template('department_courses.html', page_title='Department Courses')
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    department = request.args.get('department')
 
-@app.route('/course/<course_code>')
-def display_course(course_code):
+    if department == "All Department":
+        # get all courses
+        curs.execute('''select cid, course_code, name from course order by course_code''')
+    else:
+        curs.execute('''select cid, course_code, course.name as name
+                     from course inner join department using (did) 
+                     where department.name = %s
+                     order by course_code''',
+                     [department])
+    data = curs.fetchall()
+
+    if len(data) == 0:
+        flash('No courses found for this department.') # let user know that no matches were found 
+
+    return render_template('department_courses.html', page_title='Department Courses', data = data, department = department)
+
+@app.route('/course/<cid>')
+def display_course(cid):
     return render_template('course_reviews.html', page_title='Course Reviews')
 
 @app.route('/profile/')
