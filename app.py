@@ -39,9 +39,32 @@ def select_department():
 
     return render_template('department_courses.html', page_title='Department Courses', data = data, department = department)
 
-@app.route('/course/<cid>')
+@app.route('/courses/<cid>')
 def display_course(cid):
-    return render_template('course_reviews.html', page_title='Course Reviews')
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    sql_reviews = '''SELECT review.*, u.name AS user_name
+                        FROM review
+                        INNER JOIN course c ON review.course_id = c.cid
+                        INNER JOIN user u ON review.user_id = u.uid
+                        WHERE review.course_id = %s'''
+    curs.execute(sql_reviews, cid)
+    info_review = curs.fetchall()
+
+    if len(info_review) == 0:
+        flash('No reviews found for this course.')
+
+    else:
+        ## below will capture course_code and name from cid
+        sql_course = ('''select c.course_code, c.name from course c 
+                    where cid = %s''')
+        curs.execute(sql_course, cid)
+        info_course = curs.fetchone()
+        return render_template('course_reviews.html', 
+                               page_title='Course Reviews',
+                               reviews = info_review,
+                               course = info_course,
+                               length = len(info_review))
 
 @app.route('/profile/')
 def profile():
