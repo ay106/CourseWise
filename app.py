@@ -59,16 +59,21 @@ def display_course(cid):
     curs.execute(sql_reviews, cid)
     info_review = curs.fetchall()
 
+    ## below will capture course_code and name from cid
+    sql_course = ('''select c.course_code, c.name from course c 
+                where cid = %s''')
+    curs.execute(sql_course, cid)
+    info_course = curs.fetchone()
+
+    if not info_course:
+        # If no course is found with the given cid, redirect to department selection
+        flash('Course not found.')
+        return redirect(url_for('select_department'))
+
     if len(info_review) == 0:
         flash('No reviews found for this course.')
 
-    else:
-        ## below will capture course_code and name from cid
-        sql_course = ('''select c.course_code, c.name from course c 
-                    where cid = %s''')
-        curs.execute(sql_course, cid)
-        info_course = curs.fetchone()
-        return render_template('course_reviews.html', 
+    return render_template('course_reviews.html', 
                                page_title='Course Reviews',
                                reviews = info_review,
                                course = info_course,
