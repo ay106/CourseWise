@@ -15,6 +15,10 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
 @app.route('/')
 def home():
+    # hardcode user values since draft version does not have sign-up/login functionality
+    session['uid'] = 1
+    session['email'] = 'jc103@wellesley.edu'
+    session['name'] = 'Vaishu Chintam'
     return render_template('main.html', page_title='Home')
 
 @app.route('/department/')
@@ -35,9 +39,13 @@ def select_department():
     data = curs.fetchall()
 
     if len(data) == 0:
-        flash('No courses found for this department.') # let user know that no matches were found 
+        # let user know that no matches were found 
+        flash('No courses found for this department.')
 
-    return render_template('department_courses.html', page_title='Department Courses', data = data, department = department)
+    return render_template('department_courses.html', 
+                           page_title='Department Courses', 
+                           data = data, 
+                           department = department)
 
 @app.route('/courses/<cid>')
 def display_course(cid):
