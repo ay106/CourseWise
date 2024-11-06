@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<h1>Add Review for {{ course_code }}</h1>
+
+<form method="POST" action="{{url_for('add_review', course_code = course_code, cid = cid)}}">
+    <div class="review-box">
+    <label>Semester:</label>
+    <div>
+        <input type="radio" id="sem_fall" name="sem" value="Fall" required>
+        <label for="sem_fall">Fall</label>
+        <input type="radio" id="sem_winter" name="sem" value="Winter">
+        <label for="sem_winter">Winter</label>
+        <input type="radio" id="sem_spring" name="sem" value="Spring">
+        <label for="sem_spring">Spring</label>
+        <input type="radio" id="sem_summer" name="sem" value="Summer">
+        <label for="sem_summer">Summer</label>
+    </div>
+    <br>
+    <div>
+        <label for="year">Year (yyyy):</label>
+        <input type="number" id="year" name="year" required>
+    </div>
+    <br>
+    <label>Credit Type:</label>
+    <div>
+        <input type="radio" id="credit_credit" name="credit" value="Credit" required>
+        <label for="credit_credit">Credit</label>
+        <input type="radio" id="credit_credit_non" name="credit" value="Credit-Non">
+        <label for="credit_credit_non">Credit-Non</label>
+        <input type="radio" id="credit_mandatory_credit_non" name="credit" value="Mandatory Credit-Non">
+        <label for="credit_mandatory_credit_non">Mandatory Credit-Non</label>
+    </div>
+    <br>
+    <div>
+        <label for="prof_name">Professor Name:</label>
+        <input type="text" id="prof_name" name="prof_name" required>
+    </div>
+    <br>
+    <label>Professor Rating:</label>
+    <div>
+        {% for i in range(1, 6) %}
+            <input type="radio" id="prof_rating{{ i }}" name="prof_rating" value="{{ i }}" required>
+            <label for="prof_rating{{ i }}">{{ i }}</label>
+        {% endfor %}
+    </div>
+    <br>
+    <label>Office Hours Availability:</label>
+    <div>
+        <input type="radio" id="office_always" name="office_hours" value="Always Available" required>
+        <label for="office_always">Always Available</label>
+        <input type="radio" id="office_sometimes" name="office_hours" value="Sometimes Available">
+        <label for="office_sometimes">Sometimes Available</label>
+        <input type="radio" id="office_never" name="office_hours" value="Never Available">
+        <label for="office_never">Never Available</label>
+        <input type="radio" id="office_schedule" name="office_hours" value="Need to Schedule">
+        <label for="office_schedule">Need to Schedule</label>
+    </div>
+    <br>
+    <label>Helped Me Learn:</label>
+    <div>
+        <input type="radio" id="helped_learn_yes" name="helped_learn" value="Yes" required>
+        <label for="helped_learn_yes">Yes</label>
+        
+        <input type="radio" id="helped_learn_no" name="helped_learn" value="No" required>
+        <label for="helped_learn_no">No</label>
+    </div>
+    <br>
+    <label>Stimulated Interest:</label>
+    <div>
+        <input type="radio" id="stim_interest_yes" name="stim_interest" value="Yes" required>
+        <label for="stim_interest_yes">Yes</label>
+        
+        <input type="radio" id="stim_interest_no" name="stim_interest" value="No" required>
+        <label for="stim_interest_no">No</label>
+    </div>
+    <br>
+    <label>Difficulty:</label>
+    <div>
+        <input type="radio" id="difficulty_easy" name="difficulty" value="Easy" required>
+        <label for="difficulty_easy">Easy</label>
+        <input type="radio" id="difficulty_medium" name="difficulty" value="Medium">
+        <label for="difficulty_medium">Medium</label>
+        <input type="radio" id="difficulty_hard" name="difficulty" value="Hard">
+        <label for="difficulty_hard">Hard</label>
+    </div>
+    <br>
+    <label>Would Take Again:</label>
+    <div>
+        <input type="radio" id="take_again_yes" name="take_again" value="Yes" required>
+        <label for="take_again_yes">Yes</label>
+        
+        <input type="radio" id="take_again_no" name="take_again" value="No" required>
+        <label for="take_again_no">No</label>
+    </div>
+    <br>
+    <label>Workload:</label>
+    <div>
+        <input type="radio" id="load_light" name="load_heavy" value="Light" required>
+        <label for="load_light">Light</label>
+        <input type="radio" id="load_medium" name="load_heavy" value="Medium">
+        <label for="load_medium">Medium</label>
+        <input type="radio" id="load_heavy" name="load_heavy" value="Heavy">
+        <label for="load_heavy">Heavy</label>
+    </div>
+    <br>
+    <div>
+        <label for="description">Course Review:</label>
+        <textarea id="description" name="description" required></textarea>
+    </div>
+
+    <br>
+    <button type="submit">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
