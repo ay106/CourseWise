@@ -60,15 +60,15 @@ def display_course(cid):
     info_review = curs.fetchall()
 
     ## below will capture course_code and name from cid
-    sql_course = ('''select c.course_code, c.name from course c 
+    sql_course = ('''select c.cid, c.course_code, c.name from course c 
                 where cid = %s''')
     curs.execute(sql_course, cid)
     info_course = curs.fetchone()
 
     if not info_course:
-        # If no course is found with the given cid, redirect to department selection
+        # If no course is found with the given cid, redirect to home page
         flash('Course not found.')
-        return redirect(url_for('select_department'))
+        return redirect(url_for('home'))
 
     if len(info_review) == 0:
         flash('No reviews found for this course.')
@@ -78,6 +78,45 @@ def display_course(cid):
                                reviews = info_review,
                                course = info_course,
                                length = len(info_review))
+
+@app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
+def add_review(course_code, cid):
+    if request.method == 'POST':
+        prof_name = request.form.get('prof_name')
+        prof_rating = request.form.get('prof_rating')
+        difficulty = request.form.get('difficulty')
+        credit = request.form.get('credit')
+        sem = request.form.get('sem')
+        year = request.form.get('year')
+        take_again = request.form.get('take_again')
+        load_heavy = request.form.get('load_heavy')
+        office_hours = request.form.get('office_hours')
+        helped_learn = request.form.get('helped_learn')
+        stim_interest = request.form.get('stim_interest')
+        description = request.form.get('description')
+
+        user_id = session.get('uid') 
+
+        conn = dbi.connect()
+        curs = dbi.dict_cursor(conn)
+        curs.execute('''
+            insert into review (course_id, user_id, prof_name, prof_rating, 
+                                difficulty, credit, sem, year, take_again, 
+                                load_heavy, office_hours, helped_learn, 
+                                stim_interest, description, last_updated)
+            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            ''', (cid, user_id, prof_name, prof_rating, difficulty, credit,
+                  sem, year, take_again, load_heavy, office_hours, 
+                  helped_learn, stim_interest, description))
+        conn.commit()
+
+        flash("Review added successfully!")
+        return redirect(url_for('display_course', cid=cid))
+    else:
+        return render_template('add_review.html', 
+                               page_title='Add Review', 
+                               course_code=course_code,
+                               cid = cid)
 
 @app.route('/profile/')
 def profile():
