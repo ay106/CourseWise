@@ -95,17 +95,38 @@ def add_review(course_code, cid):
         stim_interest = request.form.get('stim_interest')
         description = request.form.get('description')
 
-        user_id = session.get('uid') 
+        user_id = session.get('uid') # get user id from session 
 
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
+
+        # insert professor into professor table if prof_name not already in the table
+        curs.execute('''select * from professor where name=%s''',[prof_name])
+        prof_data = curs.fetchone()
+        if not prof_data:
+            # get department id for the course
+            cid_int = int(cid)
+            curs.execute('''select did from course where cid=%s''', [cid_int])
+            course = curs.fetchone()
+            dept_id = course['did']
+
+            curs.execute('''insert into professor(name, department_id) 
+                         values (%s, %s)''',[prof_name, dept_id])
+            conn.commit()
+
+        # get professor id 
+        curs.execute('''select pid from professor where name=%s''',[prof_name])
+        prof = curs.fetchone()
+        prof_id = prof['pid']
+
+        # insert review
         curs.execute('''
-            insert into review (course_id, user_id, prof_name, prof_rating, 
+            insert into review (course_id, user_id, prof_name, prof_rating, prof_id,
                                 difficulty, credit, sem, year, take_again, 
                                 load_heavy, office_hours, helped_learn, 
                                 stim_interest, description, last_updated)
-            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-            ''', (cid, user_id, prof_name, prof_rating, difficulty, credit,
+            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            ''', (cid, user_id, prof_name, prof_rating, prof_id, difficulty, credit,
                   sem, year, take_again, load_heavy, office_hours, 
                   helped_learn, stim_interest, description))
         conn.commit()

@@ -3,11 +3,11 @@
 {% block main_content %}
     <h1>{{department}} Courses</h1>
     <p><em>Click on a course to view reviews.</em></p>
-    <ol>
+    <ul>
         {% if data %}
             {% for course in data %}
                 <li><a href="{{ url_for('display_course', cid = course['cid']) }}">{{course['course_code']}} {{course['name']}}</a></li>
             {% endfor %}
         {% endif %}
-    </ol>
+    </ul>
 {% endblock %}

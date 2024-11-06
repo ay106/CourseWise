@@ -26,6 +26,11 @@ h2, h3 {
     color: var(--color-header);
 }
 
+a {
+    color: black;
+    text-decoration: none;
+}
+
 .navbar {
     display: flex;
     align-items: center;
