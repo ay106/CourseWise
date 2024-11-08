@@ -149,6 +149,7 @@ def profile():
     curs = dbi.dict_cursor(conn)
     curs.execute('''SELECT *
                     FROM review r
+                    INNER JOIN course c on r.course_id = c.cid
                     INNER JOIN user u ON r.user_id = u.uid
                     WHERE r.user_id=%s''', [session['uid']])
     info_review = curs.fetchall()
