@@ -141,25 +141,25 @@ def add_review(course_code, cid):
 
 @app.route('/profile/')
 def profile():
-    session['uid'] = 1
-    session['email'] = 'jc103@wellesley.edu'
-    session['name'] = 'Vaishu Chintam'
+    uid = session.get('uid')
+    email = session.get('email')
+    name = session.get('name')
 
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
     curs.execute('''SELECT *
                     FROM review r
                     INNER JOIN user u ON r.user_id = u.uid
-                    WHERE r.user_id=%s''', [session['uid']])
+                    WHERE r.user_id=%s''', [uid])
     info_review = curs.fetchall()
 
     if len(info_review) == 0:
         flash('No reviews found for this course.')
 
     return render_template('profile.html', page_title='Profile', 
-                                           uid=session['uid'], 
-                                           email=session['email'], 
-                                           name=session['name'],
+                                           uid=uid, 
+                                           email=email, 
+                                           name=name,
                                            reviews=info_review)
 
 
