@@ -13,13 +13,27 @@ app.secret_key = secrets.token_hex()
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
+departments = None
+
+def get_departments():
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select name from department''')
+    return curs.fetchall()
+
 @app.route('/')
 def home():
     # hardcode user values since draft version does not have sign-up/login functionality
     session['uid'] = 1
     session['email'] = 'jc103@wellesley.edu'
     session['name'] = 'Vaishu Chintam'
-    return render_template('main.html', page_title='Home')
+
+    global departments 
+    if departments is None:
+        departments = get_departments()
+
+    return render_template('base.html', page_title='Home', departments=departments)
+
 
 @app.route('/department/')
 def select_department():
@@ -45,7 +59,8 @@ def select_department():
     return render_template('department_courses.html', 
                            page_title='Department Courses', 
                            data = data, 
-                           department = department)
+                           department = department,
+                           departments=departments)
 
 @app.route('/courses/<cid>')
 def display_course(cid):
@@ -77,7 +92,8 @@ def display_course(cid):
                                page_title='Course Reviews',
                                reviews = info_review,
                                course = info_course,
-                               length = len(info_review))
+                               length = len(info_review),
+                               departments=departments)
 
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):
@@ -137,7 +153,8 @@ def add_review(course_code, cid):
         return render_template('add_review.html', 
                                page_title='Add Review', 
                                course_code=course_code,
-                               cid = cid)
+                               cid = cid,
+                               departments=departments)
 
 @app.route('/profile/')
 def profile():
@@ -160,7 +177,8 @@ def profile():
                                            uid=uid, 
                                            email=email, 
                                            name=name,
-                                           reviews=info_review)
+                                           reviews=info_review,
+                                           departments=departments)
 
 
 if __name__ == '__main__':
