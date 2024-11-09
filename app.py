@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 
-import cs304dbi as dbi
+import queries as db
 
 import secrets
 
@@ -15,12 +15,6 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
 departments = None
 
-def get_departments():
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    curs.execute('''select name from department''')
-    return curs.fetchall()
-
 @app.route('/')
 def home():
     # hardcode user values since draft version does not have sign-up/login functionality
@@ -30,27 +24,16 @@ def home():
 
     global departments 
     if departments is None:
-        departments = get_departments()
+        departments = db.get_departments()
 
     return render_template('base.html', page_title='Home', departments=departments)
 
 
 @app.route('/department/')
 def select_department():
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
     department = request.args.get('department')
 
-    if department == "All Department":
-        # get all courses
-        curs.execute('''select cid, course_code, name from course order by course_code''')
-    else:
-        curs.execute('''select cid, course_code, course.name as name
-                     from course inner join department using (did) 
-                     where department.name = %s
-                     order by course_code''',
-                     [department])
-    data = curs.fetchall()
+    data = db.get_courses_by_department(department)
 
     if len(data) == 0:
         # let user know that no matches were found 
@@ -64,21 +47,11 @@ def select_department():
 
 @app.route('/courses/<cid>')
 def display_course(cid):
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    sql_reviews = '''SELECT review.*, u.name AS user_name
-                        FROM review
-                        INNER JOIN course c ON review.course_id = c.cid
-                        INNER JOIN user u ON review.user_id = u.uid
-                        WHERE review.course_id = %s'''
-    curs.execute(sql_reviews, cid)
-    info_review = curs.fetchall()
+    # get all reviews for course
+    info_review = db.get_course_reviews(int(cid))
 
     ## below will capture course_code and name from cid
-    sql_course = ('''select c.cid, c.course_code, c.name from course c 
-                where cid = %s''')
-    curs.execute(sql_course, cid)
-    info_course = curs.fetchone()
+    info_course = db.get_course_info_by_cid(cid)
 
     if not info_course:
         # If no course is found with the given cid, redirect to home page
@@ -89,11 +62,11 @@ def display_course(cid):
         flash('No reviews found for this course.')
 
     return render_template('course_reviews.html', 
-                               page_title='Course Reviews',
-                               reviews = info_review,
-                               course = info_course,
-                               length = len(info_review),
-                               departments=departments)
+                           page_title='Course Reviews',
+                           reviews = info_review,
+                           course = info_course,
+                           length = len(info_review),
+                           departments=departments)
 
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):
@@ -113,39 +86,21 @@ def add_review(course_code, cid):
 
         user_id = session.get('uid') # get user id from session 
 
-        conn = dbi.connect()
-        curs = dbi.dict_cursor(conn)
-
         # insert professor into professor table if prof_name not already in the table
-        curs.execute('''select * from professor where name=%s''',[prof_name])
-        prof_data = curs.fetchone()
+        prof_data = db.get_prof_by_name(prof_name)
         if not prof_data:
             # get department id for the course
-            cid_int = int(cid)
-            curs.execute('''select did from course where cid=%s''', [cid_int])
-            course = curs.fetchone()
-            dept_id = course['did']
+            course_data = db.get_course_info_by_cid(int(cid))
+            dept_id = course_data['did']
 
-            curs.execute('''insert into professor(name, department_id) 
-                         values (%s, %s)''',[prof_name, dept_id])
-            conn.commit()
+            db.insert_professor(prof_name, dept_id)
 
         # get professor id 
-        curs.execute('''select pid from professor where name=%s''',[prof_name])
-        prof = curs.fetchone()
+        prof = db.get_prof_by_name(prof_name)
         prof_id = prof['pid']
 
         # insert review
-        curs.execute('''
-            insert into review (course_id, user_id, prof_name, prof_rating, prof_id,
-                                difficulty, credit, sem, year, take_again, 
-                                load_heavy, office_hours, helped_learn, 
-                                stim_interest, description, last_updated)
-            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-            ''', (cid, user_id, prof_name, prof_rating, prof_id, difficulty, credit,
-                  sem, year, take_again, load_heavy, office_hours, 
-                  helped_learn, stim_interest, description))
-        conn.commit()
+        db.insert_review(int(cid), user_id, prof_name, prof_rating, prof_id, difficulty, credit, sem, year, take_again, load_heavy, office_hours, helped_learn, stim_interest, description)
 
         flash("Review added successfully!")
         return redirect(url_for('display_course', cid=cid))
@@ -162,13 +117,7 @@ def profile():
     email = session.get('email')
     name = session.get('name')
 
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    curs.execute('''SELECT *
-                    FROM review r
-                    INNER JOIN user u ON r.user_id = u.uid
-                    WHERE r.user_id=%s''', [uid])
-    info_review = curs.fetchall()
+    info_review = db.get_reviews_by_uid(uid)
 
     if len(info_review) == 0:
         flash('No reviews found for this course.')
@@ -190,8 +139,5 @@ if __name__ == '__main__':
     else:
         port = os.getuid()
 
-    db_to_use = 'cwise_db' 
-    print(f'will connect to {db_to_use}')
-    dbi.conf(db_to_use)
     app.debug = True
     app.run('0.0.0.0',port)
