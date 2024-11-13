@@ -117,10 +117,15 @@ def profile():
     email = session.get('email')
     name = session.get('name')
 
-    info_review = db.get_reviews_by_uid(uid)
-
+    # info_review = db.get_reviews_by_uid(uid)
+    info_review = db.get_profile_reviews(uid)
+    # print(info_review)
     if len(info_review) == 0:
         flash('No reviews found for this course.')
+    
+    global departments 
+    if departments is None:
+        departments = db.get_departments()
 
     return render_template('profile.html', page_title='Profile', 
                                            uid=uid, 
