@@ -2,8 +2,8 @@
 */
 
 HTML {
-    --color-header: #007ea9;  /* color for H1-H6 and others. was deepskyblue but poor contrast. */
-    --color-hilite: #b50000;  /* was red, but this avoids WAVE contrast errors */ 
+    --color-header: #092b65;
+    --color-hilite: #b50000;
     --color-focus: #56B929;
     --font-family: Verdana;
     font-family: var(--font-family)
@@ -28,7 +28,10 @@ h2, h3 {
 
 a {
     color: black;
-    text-decoration: none;
+}
+
+.center {
+    text-align: center;
 }
 
 .navbar {

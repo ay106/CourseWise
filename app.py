@@ -123,9 +123,6 @@ def profile():
     if len(info_review) == 0:
         flash('No reviews found for this course.')
     
-    global departments 
-    if departments is None:
-        departments = db.get_departments()
 
     return render_template('profile.html', page_title='Profile', 
                                            uid=uid, 
