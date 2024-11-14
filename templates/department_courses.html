@@ -8,7 +8,7 @@
         <ul class="course-list">
             {% if data %}
                 {% for course in data %}
-                    <li><a href="{{ url_for('display_course', cid = course['cid']) }}">{{course['course_code']}} {{course['name']}}</a></li>
+                    <li><a href="{{ url_for('display_course', cid = course['cid']) }}" class = "course">{{course['course_code']}} {{course['name']}}</a></li>
                 {% endfor %}
             {% endif %}
         </ul>

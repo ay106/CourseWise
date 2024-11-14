@@ -33,6 +33,10 @@ a {
     color: white;
 }
 
+a.course{
+    color:#000852;
+}
+
 .center {
     text-align: center;
     color: white;
