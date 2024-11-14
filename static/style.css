@@ -28,7 +28,7 @@ h2, h3 {
 }
 
 a {
-    color: rgb(0, 0, 0);
+    color: white;
 }
 
 a.course{
@@ -44,7 +44,8 @@ a.course{
 .navbar {
     display: flex;
     align-items: center;
-    background-color: #8ca5d2;
+    background-color: #000852;
+    ;
     color: white;
     padding: 10px;
 }
@@ -93,7 +94,8 @@ a.course{
 .btn {
     padding: 1px 6px;
     border: 1px outset;
-    border-radius: 3px;
-    background-color: #aeb9cd;
+    border-radius: 6px;
+    color: white;
+    background-color: #000852;
     margin-left: auto;
 }
