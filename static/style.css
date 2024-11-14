@@ -2,18 +2,18 @@
 */
 
 HTML {
-    --color-header: #007ea9;  /* color for H1-H6 and others. was deepskyblue but poor contrast. */
-    --color-hilite: #b50000;  /* was red, but this avoids WAVE contrast errors */ 
-    --color-focus: #56B929;
-    --font-family: Verdana;
-    font-family: var(--font-family)
+    font-family: sans-serif;
+    line-height: 1.6;
+    margin: 0;
 }
 
 /* For flashed messages; make them stand out using red and italics */
 
 #messages {
-    color: var(--color-hilite);
-    font-style: italic;
+    color: #ff0000;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
 }
 
 
@@ -27,23 +27,25 @@ h2, h3 {
 }
 
 a {
-    color: black;
+    color: white;
     text-decoration: none;
 }
 
 .navbar {
     display: flex;
     align-items: center;
-    background-color: #b1c0d9;
+    background-color: #00163b;
+    color: white;
     padding: 10px;
 }
 
 .nav-button {
-    color: black;
+    color: white;
     text-decoration: none;
     margin-right: 20px;
     padding: 2px 5px;
     border-radius: 5px;
+    border-style: solid;
 }
 
 .nav-dropdown {
@@ -61,20 +63,26 @@ a {
     padding-left: 0; 
 }
 .review-box {
-        border: 1px solid #ccc; 
+        border: 1px solid #bec9ff; 
         padding: 15px;
-        margin-bottom: 15px;
+        margin: 15px;
         border-radius: 5px; 
-        background-color: #f9f9f9; 
+        background-color: #f9f9f9a2; 
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
 }
+.row {
+    display: flex;
 
-a.button {
+  }
+  
+  .column {
+    flex: 50%;
+  }
+
+.btn {
     padding: 1px 6px;
-    border: 1px outset buttonborder;
+    border: 1px outset;
     border-radius: 3px;
-    color: buttontext;
-    background-color: buttonface;
-    text-decoration: none;
+    background-color: #000852;
     margin-left: auto;
 }

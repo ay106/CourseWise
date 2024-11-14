@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-    <h1>{{department}} Courses</h1>
-    <p><em>Click on a course to view reviews.</em></p>
-    <ul>
-        {% if data %}
-            {% for course in data %}
-                <li><a href="{{ url_for('display_course', cid = course['cid']) }}">{{course['course_code']}} {{course['name']}}</a></li>
-            {% endfor %}
-        {% endif %}
-    </ul>
+<div class="container pt-3 d-flex justify-content-center align-items-center">
+    <div class="department-courses">
+        <h1>{{department}} Courses</h1>
+        <p><em>Click on a course to view reviews.</em></p>
+        <ul class="course-list">
+            {% if data %}
+                {% for course in data %}
+                    <li><a href="{{ url_for('display_course', cid = course['cid']) }}">{{course['course_code']}} {{course['name']}}</a></li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+    </div>
+</div>
 {% endblock %}

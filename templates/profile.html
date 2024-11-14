@@ -1,29 +1,39 @@
 {% extends "base.html" %}
 
 {% block main_content %}
+<div class="container pt-3 d-flex justify-content-center align-items-center">
+    <div class="profile-container"> 
 
+        <div class="user-info"> 
+            <h1>{{ name }}</h1>
+            <p>{{ email }}</p>
+        </div>
 
-<h1> {{name}} </h1>
-<p> {{email}} </p>
+        <div class="user-reviews"> 
+            <h3>My Reviews</h3>
+            <ul class="review-list">
+                {% for r in reviews %}
+                    <li class="review-box">
+                        <div class="review-header"> 
+                            <p><strong>Professor Name:</strong> {{ r.prof_name }} (<strong>Rating:</strong> {{ r.prof_rating }})</p> 
+                        </div>
+                        <div class="review-details">
+                            <p><strong>Difficulty:</strong> {{ r.difficulty }}</p>
+                            <p><strong>Credit Type:</strong> {{ r.credit }}</p>
+                            <p><strong>Semester:</strong> {{ r.sem }} {{ r.year }}</p>
+                            <p><strong>Take Again:</strong> {{ r.take_again }}</p>
+                            <p><strong>Workload:</strong> {{ r.load_heavy }}</p>
+                            <p><strong>Office Hours Availability:</strong> {{ r.office_hours }}</p>
+                            <p><strong>Helped Me Learn:</strong> {{ r.helped_learn }}</p>
+                            <p><strong>Stimulated Interest:</strong> {{ r.stim_interest }}</p>
+                            <p><strong>Review:</strong> {{ r.description }}</p>
+                            <p><em>Last Updated:</em> {{ r.last_updated }}</p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
 
-<h3>My Reviews</h3>
-<div class="course_reviews">
-    <ul>
-        {% for r in reviews %}
-            <li class="review-box">
-                <p><strong>Professor Name:</strong> {{ r.prof_name }} (<strong>Rating:</strong> {{ r.prof_rating }})
-                <p><strong>Difficulty:</strong> {{ r.difficulty }}</p>
-                <p><strong>Credit Type:</strong> {{ r.credit }}</p>
-                <p><strong>Semester:</strong> {{ r.sem }} {{ r.year }}</p>
-                <p><strong>Take Again:</strong> {{ r.take_again }}</p>
-                <p><strong>Workload:</strong> {{ r.load_heavy }}</p>
-                <p><strong>Office Hours Availability:</strong> {{ r.office_hours }}</p>
-                <p><strong>Helped Me Learn:</strong> {{ r.helped_learn }}</p>
-                <p><strong>Stimulated Interest:</strong> {{ r.stim_interest }}</p>
-                <p><strong>Review:</strong> {{ r.description }}</p>
-                <p><em>Last Updated:</em> {{ r.last_updated }}</p>
-            </li>
-        {% endfor %}
-    </ul>
+    </div> 
 </div>
 {% endblock %}
