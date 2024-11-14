@@ -2,6 +2,9 @@
 */
 
 HTML {
+    --color-header: #092b65;
+    --color-hilite: #b50000;
+    --color-focus: #56B929;
     font-family: sans-serif;
     line-height: 1.6;
     margin: 0;
@@ -27,6 +30,11 @@ h2, h3 {
 }
 
 a {
+    color: white;
+}
+
+.center {
+    text-align: center;
     color: white;
     text-decoration: none;
 }
