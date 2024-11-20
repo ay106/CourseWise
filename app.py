@@ -50,6 +50,26 @@ def select_department():
                            department = department,
                            departments=departments)
 
+@app.route('/add_course', methods=['GET', 'POST'])
+def add_course():
+    conn = dbi.connect()
+    departments = db.get_departments(conn)
+    if request.method == 'POST':
+        course_code = request.form.get('course_code')
+        course_name = request.form.get('course_name')
+        department = request.form.get('department')
+
+        existing_course = db.get_course_by_code(conn, course_code)
+        if existing_course:
+            flash('This course already exists in the database.')
+            return redirect(url_for('add_course'))
+        dept_id = db.get_department_id(conn, department) 
+        db.insert_course(conn, course_code, course_name, dept_id)
+        flash('Course added successfully!')
+        return redirect(url_for('select_department', department=department))  # Redirect back to the department page
+    else:
+        return render_template('add_courses.html', page_title='Add Course', departments=departments) 
+
 @app.route('/courses/<cid>')
 def display_course(cid):
     conn = dbi.connect()

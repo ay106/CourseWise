@@ -5,6 +5,17 @@ def get_departments(conn):
     curs.execute('''select name from department''')
     return curs.fetchall()
 
+def get_department_id(conn, department_name):
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''SELECT did FROM department WHERE name = %s''', [department_name])
+    dept = curs.fetchone()
+    return dept['did'] if dept else None
+
+def get_course_by_code(conn, course_code):
+     curs = dbi.dict_cursor(conn)
+     curs.execute('''SELECT * FROM course WHERE course_code = %s''', [course_code])
+     return curs.fetchone()
+
 def get_courses_by_department(conn, department):
     curs = dbi.dict_cursor(conn)
     if department == "All Department":
@@ -57,6 +68,14 @@ def insert_review(conn, cid, user_id, prof_name, prof_rating, prof_id, difficult
             ''', (cid, user_id, prof_name, prof_rating, prof_id, difficulty, credit,
                   sem, year, take_again, load_heavy, office_hours, 
                   helped_learn, stim_interest, description))
+    conn.commit()
+
+def insert_course(conn, course_code, course_name, dept_id):
+    curs = dbi.dict_cursor(conn)
+    curs.execute("""
+        INSERT INTO course (course_code, name, did)
+        VALUES (%s, %s, %s)
+    """, [course_code, course_name, dept_id])
     conn.commit()
 
 def get_reviews_by_uid(conn, uid):

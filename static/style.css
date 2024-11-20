@@ -85,11 +85,11 @@ a.course{
 .row {
     display: flex;
 
-  }
+}
   
-  .column {
+.column {
     flex: 50%;
-  }
+}
 
 .btn {
     padding: 1px 6px;

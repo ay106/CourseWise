@@ -12,6 +12,10 @@
                 {% endfor %}
             {% endif %}
         </ul>
-    </div>
+    </div>    
+</div>
+<div class="container pt-3">
+    <p>Missing a course?</p>
+    <a href="{{ url_for('add_course')}}" class="btn">Add Course</a>
 </div>
 {% endblock %}
