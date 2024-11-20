@@ -1,9 +1,12 @@
+# Authors: Vaishu, Ashley, Kathy, and Mukhlisa
+
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 
+import cs304dbi as dbi
 import queries as db
 
 import secrets
@@ -17,6 +20,7 @@ departments = None
 
 @app.route('/')
 def home():
+    conn = dbi.connect()
     # hardcode user values since draft version does not have sign-up/login functionality
     session['uid'] = 1
     session['email'] = 'jc103@wellesley.edu'
@@ -24,16 +28,17 @@ def home():
 
     global departments 
     if departments is None:
-        departments = db.get_departments()
+        departments = db.get_departments(conn)
 
     return render_template('base.html', page_title='Home', departments=departments)
 
 
 @app.route('/department/')
 def select_department():
+    conn = dbi.connect()
     department = request.args.get('department')
 
-    data = db.get_courses_by_department(department)
+    data = db.get_courses_by_department(conn, department)
 
     if len(data) == 0:
         # let user know that no matches were found 
@@ -47,11 +52,13 @@ def select_department():
 
 @app.route('/courses/<cid>')
 def display_course(cid):
+    conn = dbi.connect()
     # get all reviews for course
-    info_review = db.get_course_reviews(int(cid))
+    int_cid = int(cid)
+    info_review = db.get_course_reviews(conn, int_cid)
 
     ## below will capture course_code and name from cid
-    info_course = db.get_course_info_by_cid(cid)
+    info_course = db.get_course_info_by_cid(conn, int_cid)
 
     if not info_course:
         # If no course is found with the given cid, redirect to home page
@@ -71,6 +78,8 @@ def display_course(cid):
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):
     if request.method == 'POST':
+        conn = dbi.connect()
+
         prof_name = request.form.get('prof_name')
         prof_rating = request.form.get('prof_rating')
         difficulty = request.form.get('difficulty')
@@ -85,22 +94,23 @@ def add_review(course_code, cid):
         description = request.form.get('description')
 
         user_id = session.get('uid') # get user id from session 
+        int_cid = int(cid)
 
         # insert professor into professor table if prof_name not already in the table
-        prof_data = db.get_prof_by_name(prof_name)
+        prof_data = db.get_prof_by_name(conn, prof_name)
         if not prof_data:
             # get department id for the course
-            course_data = db.get_course_info_by_cid(int(cid))
+            course_data = db.get_course_info_by_cid(conn, int_cid)
             dept_id = course_data['did']
 
-            db.insert_professor(prof_name, dept_id)
+            db.insert_professor(conn, prof_name, dept_id)
 
         # get professor id 
-        prof = db.get_prof_by_name(prof_name)
+        prof = db.get_prof_by_name(conn, prof_name)
         prof_id = prof['pid']
 
         # insert review
-        db.insert_review(int(cid), user_id, prof_name, prof_rating, prof_id, difficulty, credit, sem, year, take_again, load_heavy, office_hours, helped_learn, stim_interest, description)
+        db.insert_review(conn, int_cid, user_id, prof_name, prof_rating, prof_id, difficulty, credit, sem, year, take_again, load_heavy, office_hours, helped_learn, stim_interest, description)
 
         flash("Review added successfully!")
         return redirect(url_for('display_course', cid=cid))
@@ -113,15 +123,16 @@ def add_review(course_code, cid):
 
 @app.route('/profile/')
 def profile():
+    conn = dbi.connect()
+
     uid = session.get('uid')
     email = session.get('email')
     name = session.get('name')
 
-    # info_review = db.get_reviews_by_uid(uid)
-    info_review = db.get_profile_reviews(uid)
-    # print(info_review)
+
+    info_review = db.get_profile_reviews(conn, uid)
     if len(info_review) == 0:
-        flash('No reviews found for this course.')
+        flash('No reviews found for this user.')
     
 
     return render_template('profile.html', page_title='Profile', 
@@ -141,5 +152,8 @@ if __name__ == '__main__':
     else:
         port = os.getuid()
 
+    db_to_use = 'cwise_db' 
+    print(f'will connect to {db_to_use}')
+    dbi.conf(db_to_use)
     app.debug = True
     app.run('0.0.0.0',port)
