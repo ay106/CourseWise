@@ -29,6 +29,8 @@
                             <p><strong>Stimulated Interest:</strong> {{ r.stim_interest }}</p>
                             <p><strong>Review:</strong> {{ r.description }}</p>
                             <p><em>Last Updated:</em> {{ r.last_updated }}</p>
+                            <a href="{{ url_for('edit_review', course_code = r.course_code, rid=r.rid) }}" class="btn btn-primary">Edit</a>
+                            <a href="{{ url_for('delete_review', rid=r.rid) }}" class="btn btn-danger">Delete</a>
                         </div>
                     </li>
                 {% endfor %}

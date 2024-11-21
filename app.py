@@ -50,26 +50,6 @@ def select_department():
                            department = department,
                            departments=departments)
 
-@app.route('/add_course', methods=['GET', 'POST'])
-def add_course():
-    conn = dbi.connect()
-    departments = db.get_departments(conn)
-    if request.method == 'POST':
-        course_code = request.form.get('course_code')
-        course_name = request.form.get('course_name')
-        department = request.form.get('department')
-
-        existing_course = db.get_course_by_code(conn, course_code)
-        if existing_course:
-            flash('This course already exists in the database.')
-            return redirect(url_for('add_course'))
-        dept_id = db.get_department_id(conn, department) 
-        db.insert_course(conn, course_code, course_name, dept_id)
-        flash('Course added successfully!')
-        return redirect(url_for('select_department', department=department))  # Redirect back to the department page
-    else:
-        return render_template('add_courses.html', page_title='Add Course', departments=departments) 
-
 @app.route('/courses/<cid>')
 def display_course(cid):
     conn = dbi.connect()
@@ -94,6 +74,26 @@ def display_course(cid):
                            course = info_course,
                            length = len(info_review),
                            departments=departments)
+
+@app.route('/add_course', methods=['GET', 'POST'])
+def add_course():
+    conn = dbi.connect()
+    departments = db.get_departments(conn)
+    if request.method == 'POST':
+        course_code = request.form.get('course_code')
+        course_name = request.form.get('course_name')
+        department = request.form.get('department')
+
+        existing_course = db.get_course_by_code(conn, course_code)
+        if existing_course:
+            flash('This course already exists in the database.')
+            return redirect(url_for('add_course'))
+        dept_id = db.get_department_id(conn, department) 
+        db.insert_course(conn, course_code, course_name, dept_id)
+        flash('Course added successfully!')
+        return redirect(url_for('select_department', department=department))  # Redirect back to the department page
+    else:
+        return render_template('add_courses.html', page_title='Add Course', departments=departments) 
 
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):
@@ -130,7 +130,9 @@ def add_review(course_code, cid):
         prof_id = prof['pid']
 
         # insert review
-        db.insert_review(conn, int_cid, user_id, prof_name, prof_rating, prof_id, difficulty, credit, sem, year, take_again, load_heavy, office_hours, helped_learn, stim_interest, description)
+        db.insert_review(conn, int_cid, user_id, prof_name, prof_rating, prof_id, difficulty, 
+                         credit, sem, year, take_again, load_heavy, office_hours, helped_learn, 
+                         stim_interest, description)
 
         flash("Review added successfully!")
         return redirect(url_for('display_course', cid=cid))
@@ -140,6 +142,53 @@ def add_review(course_code, cid):
                                course_code=course_code,
                                cid = cid,
                                departments=departments)
+    
+@app.route('/edit_review/<course_code>/<rid>', methods=['GET', 'POST'])
+def edit_review(course_code, rid):
+    conn = dbi.connect()
+    # fetch existing review data
+    rid = int(rid)
+    review = db.get_review_by_id(conn, rid)
+    if not review:
+        flash("Review not found.")
+        return redirect(url_for('profile')) 
+    
+    # check if the current user logged in is authorized to edit the review
+    user_id = session.get('uid')
+    if review['user_id'] != user_id:
+        flash("You are not authorized to edit this review.")
+        return redirect(url_for('profile'))
+
+    if request.method == 'POST':
+        # get updated data from form submission
+        prof_name = request.form.get('prof_name')
+        prof_rating = request.form.get('prof_rating')
+        difficulty = request.form.get('difficulty')
+        credit = request.form.get('credit')
+        sem = request.form.get('sem')
+        year = request.form.get('year')
+        take_again = request.form.get('take_again')
+        load_heavy = request.form.get('load_heavy')
+        office_hours = request.form.get('office_hours')
+        helped_learn = request.form.get('helped_learn')
+        stim_interest = request.form.get('stim_interest')
+        description = request.form.get('description')
+
+        # update the review in the database
+        db.update_review(conn, rid, prof_name, prof_rating, difficulty, credit, sem, year, 
+                         take_again, load_heavy, office_hours, helped_learn, stim_interest, 
+                         description)
+        flash("Review updated successfully!", "success")
+        return redirect(url_for('profile'))
+    else:
+        return render_template('edit_review.html', course = course_code, review=review)
+
+@app.route('/delete_review/<rid>')
+def delete_review(rid):
+    conn = dbi.connect()
+    db.delete_review(conn, int(rid))
+    flash('Review deleted successfully!')
+    return redirect(url_for('profile'))
 
 @app.route('/profile/')
 def profile():

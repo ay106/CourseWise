@@ -78,13 +78,6 @@ def insert_course(conn, course_code, course_name, dept_id):
     """, [course_code, course_name, dept_id])
     conn.commit()
 
-def get_reviews_by_uid(conn, uid):
-    curs = dbi.dict_cursor(conn)
-    curs.execute('''SELECT *
-                    FROM review r
-                    INNER JOIN user u ON r.user_id = u.uid
-                    WHERE r.user_id=%s''', [uid])
-    return curs.fetchall()
 
 def get_profile_reviews(conn, uid):
     curs = dbi.dict_cursor(conn)
@@ -94,3 +87,40 @@ def get_profile_reviews(conn, uid):
                     INNER JOIN user u ON r.user_id = u.uid
                     WHERE r.user_id=%s''', [uid])
     return curs.fetchall()
+
+def get_review_by_id(conn, rid):
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select * from review
+                 where rid = %s''', 
+                 [rid])
+    return curs.fetchone()
+
+def update_review(conn, rid, prof_name, prof_rating, difficulty, credit, 
+                  sem, year, take_again, load_heavy, office_hours, helped_learn, 
+                  stim_interest, description):
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''update review set 
+                 prof_name = %s,
+                 prof_rating = %s,
+                 difficulty = %s,
+                 credit = %s,
+                 sem = %s,
+                 year = %s,
+                 take_again = %s,
+                 load_heavy = %s,
+                 office_hours = %s,
+                 helped_learn = %s,
+                 stim_interest = %s,
+                 description = %s
+                 where rid = %s''', 
+                 [prof_name, prof_rating, difficulty, credit, 
+                  sem, year, take_again, load_heavy, office_hours, helped_learn, 
+                  stim_interest, description, rid])
+
+    conn.commit()
+
+def delete_review(conn, rid):
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''delete from review where rid = %s''', 
+                 [rid])
+    conn.commit()

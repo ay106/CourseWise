@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<div class="container pt-3">
+    <h1>Edit Review ID #{{review.rid}} for {{course}}</h1>
+
+    <form method="POST" action="{{ url_for('edit_review', course_code=course, rid=review.rid) }}">
+        <div class="review-box">
+            <label for="sem">Semester:</label>
+            <div>
+                <input type="radio" id="sem_fall" name="sem" value="Fall" 
+                       {% if review.sem == 'Fall' %}checked{% endif %} required>
+                <label for="sem_fall">Fall</label>
+                <input type="radio" id="sem_winter" name="sem" value="Winter" 
+                       {% if review.sem == 'Winter' %}checked{% endif %}>
+                <label for="sem_winter">Winter</label>
+                <input type="radio" id="sem_spring" name="sem" value="Spring" 
+                       {% if review.sem =='Spring' %}checked{% endif %}>
+                <label for="sem_spring">Spring</label>
+                <input type="radio" id="sem_summer" name="sem" value="Summer" 
+                       {% if review.sem == 'Summer' %}checked{% endif %}>
+                <label for="sem_summer">Summer</label>
+            </div>
+            <br>
+            <div>
+                <label for="year">Year (yyyy):</label>
+                <input type="number" id="year" name="year" value="{{ review.year }}" required>
+            </div>
+            <br>
+            <label for="credit">Credit Type:</label>
+            <div>
+                <input type="radio" id="credit_credit" name="credit" value="Credit" 
+                       {% if review.credit == 'Credit' %}checked{% endif %} required>
+                <label for="credit_credit">Credit</label>
+                <input type="radio" id="credit_credit_non" name="credit" value="Credit-Non" 
+                       {% if review.credit == 'Credit-Non' %}checked{% endif %}>
+                <label for="credit_credit_non">Credit-Non</label>
+                <input type="radio" id="credit_mandatory_credit_non" name="credit" value="Mandatory Credit-Non" 
+                       {% if review.credit == 'Mandatory Credit-Non' %}checked{% endif %}>
+                <label for="credit_mandatory_credit_non">Mandatory Credit-Non</label>
+            </div>
+            <br>
+            <div>
+                <label for="prof_name">Professor Name:</label>
+                <input type="text" id="prof_name" name="prof_name" value="{{ review.prof_name }}" required>
+            </div>
+            <br>
+            <label for="prof_rating">Professor Rating:</label>
+            <div>
+                {% for i in range(1, 6) %}
+                    <input type="radio" id="prof_rating{{ i }}" name="prof_rating" value="{{ i }}" 
+                           {% if review.prof_rating == i|string %}checked{% endif %} required>
+                    <label for="prof_rating{{ i }}">{{ i }}</label>
+                {% endfor %}
+            </div>
+            <br>
+            <label for="officehours">Office Hours Availability:</label>
+            <div>
+                <input type="radio" id="office_always" name="office_hours" value="Always Available" 
+                       {% if review.office_hours == 'Always Available' %}checked{% endif %} required>
+                <label for="office_always">Always Available</label>
+                <input type="radio" id="office_sometimes" name="office_hours" value="Sometimes Available" 
+                       {% if review.office_hours == 'Sometimes Available' %}checked{% endif %}>
+                <label for="office_sometimes">Sometimes Available</label>
+                <input type="radio" id="office_never" name="office_hours" value="Never Available" 
+                       {% if review.office_hours == 'Never Available' %}checked{% endif %}>
+                <label for="office_never">Never Available</label>
+                <input type="radio" id="office_schedule" name="office_hours" value="Need to Schedule" 
+                       {% if review.office_hours == 'Need to Schedule' %}checked{% endif %}>
+                <label for="office_schedule">Need to Schedule</label>
+            </div>
+            <br>
+            <label for="help_learn">Helped Me Learn:</label>
+            <div>
+                <input type="radio" id="helped_learn_yes" name="helped_learn" value="Yes" 
+                       {% if review.helped_learn == 'Yes' %}checked{% endif %} required>
+                <label for="helped_learn_yes">Yes</label>
+                <input type="radio" id="helped_learn_no" name="helped_learn" value="No" 
+                       {% if review.helped_learn == 'No' %}checked{% endif %}>
+                <label for="helped_learn_no">No</label>
+            </div>
+            <br>
+            <label for="stimulated_interest">Stimulated Interest:</label>
+            <div>
+                <input type="radio" id="stim_interest_yes" name="stim_interest" value="Yes" 
+                       {% if review.stim_interest == 'Yes' %}checked{% endif %} required>
+                <label for="stim_interest_yes">Yes</label>
+                <input type="radio" id="stim_interest_no" name="stim_interest" value="No" 
+                       {% if review.stim_interest == 'No' %}checked{% endif %}>
+                <label for="stim_interest_no">No</label>
+            </div>
+            <br>
+            <label for="diff_rating">Difficulty:</label>
+            <div>
+                <input type="radio" id="difficulty_easy" name="difficulty" value="Easy" 
+                       {% if review.difficulty == 'Easy' %}checked{% endif %} required>
+                <label for="difficulty_easy">Easy</label>
+                <input type="radio" id="difficulty_medium" name="difficulty" value="Medium" 
+                       {% if review.difficulty == 'Medium' %}checked{% endif %}>
+                <label for="difficulty_medium">Medium</label>
+                <input type="radio" id="difficulty_hard" name="difficulty" value="Hard" 
+                       {% if review.difficulty == 'Hard' %}checked{% endif %}>
+                <label for="difficulty_hard">Hard</label>
+            </div>
+            <br>
+            <label for="taking_again">Would Take Again:</label>
+            <div>
+                <input type="radio" id="take_again_yes" name="take_again" value="Yes" 
+                       {% if review.take_again == 'Yes' %}checked{% endif %} required>
+                <label for="take_again_yes">Yes</label>
+                <input type="radio" id="take_again_no" name="take_again" value="No" 
+                       {% if review.take_again == 'No' %}checked{% endif %}>
+                <label for="take_again_no">No</label>
+            </div>
+            <br>
+            <label for="workload">Workload:</label>
+            <div>
+                <input type="radio" id="load_light" name="load_heavy" value="Light" 
+                       {% if review.load_heavy == 'Light' %}checked{% endif %} required>
+                <label for="load_light">Light</label>
+                <input type="radio" id="load_medium" name="load_heavy" value="Medium" 
+                       {% if review.load_heavy == 'Medium' %}checked{% endif %}>
+                <label for="load_medium">Medium</label>
+                <input type="radio" id="load_heavy" name="load_heavy" value="Heavy" 
+                       {% if review.load_heavy == 'Heavy' %}checked{% endif %}>
+                <label for="load_heavy">Heavy</label>
+            </div>
+            <br>
+            <div>
+                <label for="description">Course Review:</label>
+                <textarea id="description" name="description" required>{{ review.description }}</textarea>
+            </div>
+
+            <br>
+            <button type="submit">Update</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
