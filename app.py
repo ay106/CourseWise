@@ -118,6 +118,21 @@ def add_course():
         course_code = request.form.get('course_code')
         course_name = request.form.get('course_name')
         department = request.form.get('department')
+        
+         # check if course code is correct format
+        try:
+            parts = course_code.split()
+            if len(parts) != 2 or not parts[0].isalpha() or not parts[1].isdigit():
+                raise ValueError  # Raise an error if the format is invalid
+            
+             # Capitalize the letter part
+            parts[0] = parts[0].upper() 
+            course_code = ' '.join(parts)
+        except ValueError:
+            flash('Invalid course code format. Format must be course department letter then course number (e.g., "CS 101").')
+            return redirect(url_for('add_course'))
+
+        #check if course already exists
 
         existing_course = db.get_course_by_code(conn, course_code)
         if existing_course:
