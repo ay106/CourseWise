@@ -91,6 +91,12 @@ a.course{
     flex: 50%;
 }
 
+p.message {
+    font-style: italic; 
+    color: #777; 
+    font-size: 0.9em;
+}
+
 .btn {
     padding: 1px 6px;
     border: 1px outset;

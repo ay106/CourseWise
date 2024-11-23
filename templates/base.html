@@ -11,17 +11,7 @@
     {% block head_stuff %}{% endblock %}
 </head>
 <body>
-
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<div id="messages">
-  {% for msg in messages %}
-  <p>{{msg}}</p>
-  {% endfor %}
-</div>
-{% endif %}
-{% endwith %}
-            
+          
 {% block nav %}
 <nav class="navbar navbar-inverse sticky-top">
   <div class="container-fluid">
@@ -33,6 +23,17 @@
     </ul>
   </div>
 </nav>
+<div class="message">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="messages">
+      {% for msg in messages %}
+      <p>{{msg}}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+</div>
 {% endblock %}
 {% block main_content %}
 <main>
