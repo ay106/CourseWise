@@ -1,21 +1,40 @@
 import cs304dbi as dbi
 
+'''
+Gets all department names from department table.
+
+param conn: database connection
+
+return: a list of dictionaries containing department names
+'''
 def get_departments(conn):
     curs = dbi.dict_cursor(conn)
     curs.execute('''select name from department''')
     return curs.fetchall()
 
+'''
+Gets department id for the given department name
+
+param conn: database connection
+param department_name: name of department
+
+return: the department id or None if the department does not exist 
+'''
 def get_department_id(conn, department_name):
     curs = dbi.dict_cursor(conn)
     curs.execute('''SELECT did FROM department WHERE name = %s''', [department_name])
     dept = curs.fetchone()
     return dept['did'] if dept else None
 
-def get_course_by_code(conn, course_code):
-     curs = dbi.dict_cursor(conn)
-     curs.execute('''SELECT * FROM course WHERE course_code = %s''', [course_code])
-     return curs.fetchone()
+'''
+Gets all courses belonging to the given department. 
 
+param conn: database connection
+param department: the name of the department
+
+return: a list of dictionaries containing course data for each course
+    under the department 
+'''
 def get_courses_by_department(conn, department):
     curs = dbi.dict_cursor(conn)
     if department == "All Department":
@@ -29,6 +48,14 @@ def get_courses_by_department(conn, department):
                      [department])
     return curs.fetchall()
 
+'''
+Gets all reviews for the given course.
+
+param conn: databse connection
+param cid: course id
+
+return: list of dictionaries containing review data for each review
+'''
 def get_course_reviews(conn, cid):
     curs = dbi.dict_cursor(conn)
     sql_reviews = '''SELECT review.*, u.name AS user_name
@@ -39,6 +66,14 @@ def get_course_reviews(conn, cid):
     curs.execute(sql_reviews, [cid])
     return curs.fetchall()
 
+'''
+Gets course info for the given course id.
+
+param conn: database connection
+param cid: course id 
+
+return: a dictionary holding course data
+'''
 def get_course_info_by_cid(conn, cid):
     curs = dbi.dict_cursor(conn)
     sql_course = ('''select c.cid, c.did, c.course_code, c.name from course c 
@@ -46,17 +81,53 @@ def get_course_info_by_cid(conn, cid):
     curs.execute(sql_course, [cid])
     return curs.fetchone()
 
+'''
+Inserts a new professor into the professor table
+
+param conn: database connection
+param prof_name: name of professor
+param dept_id: the id of the department the professor belongs to
+'''
 def insert_professor(conn, prof_name, dept_id):
     curs = dbi.dict_cursor(conn)
     curs.execute('''insert into professor(name, department_id) 
                          values (%s, %s)''',[prof_name, dept_id])
     conn.commit()
 
+'''
+Gets all data for the given professor. 
+
+param conn: database connection
+param prof_name: the professor's name
+
+return: a dictionary holding the professor's data from the professor table
+'''
 def get_prof_by_name(conn, prof_name):
     curs = dbi.dict_cursor(conn)
     curs.execute('''select * from professor where name=%s''',[prof_name])
     return curs.fetchone()
 
+'''
+Inserts a new review into the review table.
+
+param conn: database connection
+param cid: course id
+param user_id: user id
+param prof_name: the name of the professor who taught the course
+param prof_rating: rating given for that professor ('1','2','3','4','5')
+param prof_id: the professor's id as specified in the professor table
+param difficulty: the course's difficulty ('Easy','Medium','Hard')
+param credit: whether the course was taken for credit or not ('Credit','Credit-Non','Mandatory Credit-Non')
+param sem: the semester in which the course was taken ('Fall','Winter','Spring','Summer')
+param year: the year in which the course was taken
+param take_again: whether the rater would take the course again ('Yes','No')
+param load_heavy: describes the courseload ('Light','Medium','Heavy')
+param office_hours: describe the professor's office hours 
+    ('Always Available','Sometimes Available','Never Available','Need to Schedule')
+param helped_learn: describe whether the professor helped their learning ('Yes','No')
+param stim_interest: describe whether the course was interesting ('Yes','No')
+param description: a written description of the course provided by the reviewer
+'''
 def insert_review(conn, cid, user_id, prof_name, prof_rating, prof_id, difficulty, credit, sem, year, take_again, load_heavy, office_hours, helped_learn, stim_interest, description):
     curs = dbi.dict_cursor(conn)
     curs.execute('''
@@ -70,6 +141,14 @@ def insert_review(conn, cid, user_id, prof_name, prof_rating, prof_id, difficult
                   helped_learn, stim_interest, description))
     conn.commit()
 
+'''
+Inserts a new course to the course table.
+
+param conn: database connection
+param course_code: the course code
+param course_name: the course name
+param dept_id: the department id for the department the course belongs to
+'''
 def insert_course(conn, course_code, course_name, dept_id):
     curs = dbi.dict_cursor(conn)
     curs.execute("""
@@ -78,7 +157,15 @@ def insert_course(conn, course_code, course_name, dept_id):
     """, [course_code, course_name, dept_id])
     conn.commit()
 
+'''
+Gets all reviews written by the user. 
 
+param conn: database connection
+param uid: user id 
+
+return: a list of dictionaries containing review data for each review the user 
+submitted
+'''
 def get_profile_reviews(conn, uid):
     curs = dbi.dict_cursor(conn)
     curs.execute('''SELECT *
@@ -88,6 +175,14 @@ def get_profile_reviews(conn, uid):
                     WHERE r.user_id=%s''', [uid])
     return curs.fetchall()
 
+'''
+Gets review data for the given review id.
+
+param conn: database connection
+param rid: review id
+
+return: a dictionary holding the review data
+'''
 def get_review_by_id(conn, rid):
     curs = dbi.dict_cursor(conn)
     curs.execute('''select * from review
@@ -95,6 +190,26 @@ def get_review_by_id(conn, rid):
                  [rid])
     return curs.fetchone()
 
+'''
+Updates the review with the given review id.
+
+param conn: database connection
+param rid: the review id
+param prof_name: the name of the professor who taught the course
+param prof_rating: rating given for that professor ('1','2','3','4','5')
+param prof_id: the professor's id as specified in the professor table
+param difficulty: the course's difficulty ('Easy','Medium','Hard')
+param credit: whether the course was taken for credit or not ('Credit','Credit-Non','Mandatory Credit-Non')
+param sem: the semester in which the course was taken ('Fall','Winter','Spring','Summer')
+param year: the year in which the course was taken
+param take_again: whether the rater would take the course again ('Yes','No')
+param load_heavy: describes the courseload ('Light','Medium','Heavy')
+param office_hours: describe the professor's office hours 
+    ('Always Available','Sometimes Available','Never Available','Need to Schedule')
+param helped_learn: describe whether the professor helped their learning ('Yes','No')
+param stim_interest: describe whether the course was interesting ('Yes','No')
+param description: a written description of the course provided by the reviewer
+'''
 def update_review(conn, rid, prof_name, prof_rating, difficulty, credit, 
                   sem, year, take_again, load_heavy, office_hours, helped_learn, 
                   stim_interest, description):
@@ -119,6 +234,12 @@ def update_review(conn, rid, prof_name, prof_rating, difficulty, credit,
 
     conn.commit()
 
+'''
+Deletes the review with the given review id.
+
+param conn: database connection
+param rid: review id
+'''
 def delete_review(conn, rid):
     curs = dbi.dict_cursor(conn)
     curs.execute('''delete from review where rid = %s''', 

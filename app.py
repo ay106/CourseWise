@@ -72,7 +72,7 @@ def add_course():
             return redirect(url_for('add_course'))
 
         #check if course already exists
-        existing_course = db.get_course_by_code(conn, course_code)
+        existing_course = db.get_course_info_by_cid(conn, course_code)
         if existing_course:
             flash('This course already exists in the database.')
             return redirect(url_for('add_course'))
@@ -109,41 +109,6 @@ def display_course(cid):
                            course = info_course,
                            length = len(info_review),
                            departments=departments)
-
-@app.route('/add_course', methods=['GET', 'POST'])
-def add_course():
-    conn = dbi.connect()
-    departments = db.get_departments(conn)
-    if request.method == 'POST':
-        course_code = request.form.get('course_code')
-        course_name = request.form.get('course_name')
-        department = request.form.get('department')
-        
-         # check if course code is correct format
-        try:
-            parts = course_code.split()
-            if len(parts) != 2 or not parts[0].isalpha() or not parts[1].isdigit():
-                raise ValueError  # Raise an error if the format is invalid
-            
-             # Capitalize the letter part
-            parts[0] = parts[0].upper() 
-            course_code = ' '.join(parts)
-        except ValueError:
-            flash('Invalid course code format. Format must be course department letter then course number (e.g., "CS 101").')
-            return redirect(url_for('add_course'))
-
-        #check if course already exists
-
-        existing_course = db.get_course_by_code(conn, course_code)
-        if existing_course:
-            flash('This course already exists in the database.')
-            return redirect(url_for('add_course'))
-        dept_id = db.get_department_id(conn, department) 
-        db.insert_course(conn, course_code, course_name, dept_id)
-        flash('Course added successfully!')
-        return redirect(url_for('select_department', department=department))  # Redirect back to the department page
-    else:
-        return render_template('add_courses.html', page_title='Add Course', departments=departments) 
 
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):
