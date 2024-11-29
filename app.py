@@ -72,7 +72,7 @@ def add_course():
             return redirect(url_for('add_course'))
 
         #check if course already exists
-        existing_course = db.get_course_info_by_cid(conn, course_code)
+        existing_course = db.get_course_by_course_code(conn, course_code)
         if existing_course:
             flash('This course already exists in the database.')
             return redirect(url_for('add_course'))

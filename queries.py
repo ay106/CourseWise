@@ -22,10 +22,24 @@ return: the department id or None if the department does not exist
 '''
 def get_department_id(conn, department_name):
     curs = dbi.dict_cursor(conn)
-    curs.execute('''SELECT did FROM department WHERE name = %s''', [department_name])
+    curs.execute('''SELECT did FROM department WHERE name = %s''', 
+                 [department_name])
     dept = curs.fetchone()
     return dept['did'] if dept else None
 
+'''
+Gets course data from the course table for the provided course code.
+
+param conn: database connection
+param course_code: the course code
+
+return: a dictionary containing the course data
+'''
+def get_course_by_course_code(conn, course_code):
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select * from course where course_code = %s''', 
+                 [course_code])
+    return curs.fetchone()
 '''
 Gets all courses belonging to the given department. 
 
