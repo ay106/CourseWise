@@ -4,6 +4,10 @@
 <div class="container pt-3 d-flex justify-content-center align-items-center">
     <div class="profile-container"> 
 
+        <p> <img src="{{ src }}"></p>
+        
+        <a href="{{ url_for('file_upload') }}" class="btn btn-primary">Upload Picture</a>
+
         <div class="user-info"> 
             <h1>{{ name }}</h1>
             <p>{{ email }}</p>

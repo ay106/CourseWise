@@ -1,11 +1,11 @@
 # Authors: Vaishu, Ashley, Kathy, and Mukhlisa
 
 from flask import (Flask, render_template, make_response, url_for, request,
-                   redirect, flash, session, send_from_directory, jsonify)
+                   redirect, flash, session, send_from_directory, send_file, jsonify)
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
-
+import os
 import cs304dbi as dbi
 import queries as db
 
@@ -15,6 +15,10 @@ app.secret_key = secrets.token_hex()
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+
+# new for file upload
+app.config['UPLOADS'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
 departments = None
 
@@ -221,10 +225,57 @@ def profile():
 
     return render_template('profile.html', page_title='Profile', 
                                            uid=uid, 
+                                           src=url_for('pic',uid=uid),
                                            email=email, 
                                            name=name,
                                            reviews=info_review,
                                            departments=departments)
+
+@app.route('/pic/<uid>')
+def pic(uid):
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    numrows = curs.execute(
+        '''select filename from picfile where uid = %s''',
+        [uid])
+    if numrows == 0:
+        flash('No picture for {}'.format(uid))
+        default_pic = os.path.join(app.config['UPLOADS'], 'default.jpg')
+        if os.path.exists(default_pic):
+            return send_file(default_pic)
+        else:
+            return 'Default image not found', 404
+    row = curs.fetchone()
+    return send_from_directory(app.config['UPLOADS'],row['filename'])
+
+
+@app.route('/profile/upload', methods=["GET", "POST"])
+def file_upload():
+    conn = dbi.connect()
+    uid = session.get('uid')
+
+    if request.method == 'GET':
+        return render_template('add_profile_pic.html',src='',uid='')
+    else:
+        try:
+            f = request.files['pic']
+            user_filename = f.filename
+            ext = user_filename.split('.')[-1]
+            filename = secure_filename('{}.{}'.format(uid,ext))
+            pathname = os.path.join(app.config['UPLOADS'],filename)
+
+            # Check if file with the same uid exists
+            existing_files = [file for file in os.listdir(app.config['UPLOADS']) if file.startswith(f"{uid}.")]
+            for existing_file in existing_files:
+                os.remove(os.path.join(app.config['UPLOADS'], existing_file))
+
+            f.save(pathname)
+            db.upload_pic(conn, uid, filename)
+            flash('Upload successful')
+            return redirect(url_for('profile'))
+        except Exception as err:
+            flash('Upload failed {why}'.format(why=err))
+            return render_template('profile.html')
 
 
 if __name__ == '__main__':
