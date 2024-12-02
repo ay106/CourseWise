@@ -30,6 +30,7 @@ def home():
     session['email'] = 'jc103@wellesley.edu'
     session['name'] = 'Vaishu Chintam'
 
+    # get all department names and cache it
     global departments 
     if departments is None:
         departments = db.get_departments(conn)
@@ -116,42 +117,51 @@ def display_course(cid):
 
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):
+    # course_code is the department abbrev. and course num (ex. CS 111)
+    # cid is the course id number as stored in the course table
     if request.method == 'POST':
         conn = dbi.connect()
 
-        prof_name = request.form.get('prof_name')
-        prof_rating = request.form.get('prof_rating')
-        difficulty = request.form.get('difficulty')
-        credit = request.form.get('credit')
-        sem = request.form.get('sem')
-        year = request.form.get('year')
-        take_again = request.form.get('take_again')
-        load_heavy = request.form.get('load_heavy')
-        office_hours = request.form.get('office_hours')
-        helped_learn = request.form.get('helped_learn')
-        stim_interest = request.form.get('stim_interest')
-        description = request.form.get('description')
+        review_data = {
+            'prof_name': request.form.get('prof_name'),
+            'prof_rating': request.form.get('prof_rating'),
+            'difficulty': request.form.get('difficulty'),
+            'credit': request.form.get('credit'),
+            'sem': request.form.get('sem'),
+            'year': request.form.get('year'),
+            'take_again': request.form.get('take_again'),
+            'load_heavy': request.form.get('load_heavy'),
+            'office_hours': request.form.get('office_hours'),
+            'helped_learn': request.form.get('helped_learn'),
+            'stim_interest': request.form.get('stim_interest'),
+            'description': request.form.get('description')
+        }
 
         user_id = session.get('uid') # get user id from session 
         int_cid = int(cid)
 
         # insert professor into professor table if prof_name not already in the table
-        prof_data = db.get_prof_by_name(conn, prof_name)
+        prof_data = db.get_prof_by_name(conn, review_data['prof_name'])
         if not prof_data:
             # get department id for the course
             course_data = db.get_course_info_by_cid(conn, int_cid)
             dept_id = course_data['did']
 
-            db.insert_professor(conn, prof_name, dept_id)
+            db.insert_professor(conn, review_data['prof_name'], dept_id)
 
         # get professor id 
-        prof = db.get_prof_by_name(conn, prof_name)
+        prof = db.get_prof_by_name(conn, review_data['prof_name'])
         prof_id = prof['pid']
 
+        # add user id, prof id, and course id to review_data 
+        review_data.update({
+            'cid': int_cid,
+            'user_id': user_id,
+            'prof_id': prof_id
+        }) 
+
         # insert review
-        db.insert_review(conn, int_cid, user_id, prof_name, prof_rating, prof_id, difficulty, 
-                         credit, sem, year, take_again, load_heavy, office_hours, helped_learn, 
-                         stim_interest, description)
+        db.insert_review(conn, review_data)
 
         flash("Review added successfully!")
         return redirect(url_for('display_course', cid=cid))
@@ -180,23 +190,27 @@ def edit_review(course_code, rid):
 
     if request.method == 'POST':
         # get updated data from form submission
-        prof_name = request.form.get('prof_name')
-        prof_rating = request.form.get('prof_rating')
-        difficulty = request.form.get('difficulty')
-        credit = request.form.get('credit')
-        sem = request.form.get('sem')
-        year = request.form.get('year')
-        take_again = request.form.get('take_again')
-        load_heavy = request.form.get('load_heavy')
-        office_hours = request.form.get('office_hours')
-        helped_learn = request.form.get('helped_learn')
-        stim_interest = request.form.get('stim_interest')
-        description = request.form.get('description')
+        updated_data = {
+            'prof_name': request.form.get('prof_name'),
+            'prof_rating': request.form.get('prof_rating'),
+            'difficulty': request.form.get('difficulty'),
+            'credit': request.form.get('credit'),
+            'sem': request.form.get('sem'),
+            'year': request.form.get('year'),
+            'take_again': request.form.get('take_again'),
+            'load_heavy': request.form.get('load_heavy'),
+            'office_hours': request.form.get('office_hours'),
+            'helped_learn': request.form.get('helped_learn'),
+            'stim_interest': request.form.get('stim_interest'),
+            'description': request.form.get('description')
+        }
+
+        updated_data.update({
+            'rid': rid
+        }) 
 
         # update the review in the database
-        db.update_review(conn, rid, prof_name, prof_rating, difficulty, credit, sem, year, 
-                         take_again, load_heavy, office_hours, helped_learn, stim_interest, 
-                         description)
+        db.update_review(conn, updated_data)
         flash("Review updated successfully!", "success")
         return redirect(url_for('profile'))
     else:

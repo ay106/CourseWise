@@ -14,7 +14,7 @@
         </div>
 
         <div class="user-reviews"> 
-            <h3>My Reviews</h3>
+            <h2>My Reviews</h2>
             <ul class="review-list">
                 {% for r in reviews %}
                 <h3><a href="{{ url_for('display_course', cid = r.cid) }}" class="course">{{ r.course_code }}: {{ r.name }}</a></h3>

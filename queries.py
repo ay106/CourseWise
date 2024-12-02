@@ -130,27 +130,12 @@ def get_prof_by_name(conn, prof_name):
     return curs.fetchone()
 
 
-def insert_review(conn, cid, user_id, prof_name, prof_rating, prof_id, difficulty, credit, sem, year, take_again, load_heavy, office_hours, helped_learn, stim_interest, description):
+def insert_review(conn, review_data):
     '''
     Inserts a new review into the review table.
 
     param conn: database connection
-    param cid: course id
-    param user_id: user id
-    param prof_name: the name of the professor who taught the course
-    param prof_rating: rating given for that professor ('1','2','3','4','5')
-    param prof_id: the professor's id as specified in the professor table
-    param difficulty: the course's difficulty ('Easy','Medium','Hard')
-    param credit: whether the course was taken for credit or not ('Credit','Credit-Non','Mandatory Credit-Non')
-    param sem: the semester in which the course was taken ('Fall','Winter','Spring','Summer')
-    param year: the year in which the course was taken
-    param take_again: whether the rater would take the course again ('Yes','No')
-    param load_heavy: describes the courseload ('Light','Medium','Heavy')
-    param office_hours: describe the professor's office hours 
-        ('Always Available','Sometimes Available','Never Available','Need to Schedule')
-    param helped_learn: describe whether the professor helped their learning ('Yes','No')
-    param stim_interest: describe whether the course was interesting ('Yes','No')
-    param description: a written description of the course provided by the reviewer
+    param review_data: dictionary holding the review data 
     '''
     curs = dbi.dict_cursor(conn)
     curs.execute('''
@@ -159,9 +144,12 @@ def insert_review(conn, cid, user_id, prof_name, prof_rating, prof_id, difficult
                                 load_heavy, office_hours, helped_learn, 
                                 stim_interest, description, last_updated)
             values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-            ''', (cid, user_id, prof_name, prof_rating, prof_id, difficulty, credit,
-                  sem, year, take_again, load_heavy, office_hours, 
-                  helped_learn, stim_interest, description))
+            ''', (review_data['cid'], review_data['user_id'], review_data['prof_name'], 
+                  review_data['prof_rating'], review_data['prof_id'], review_data['difficulty'], 
+                  review_data['credit'], review_data['sem'], review_data['year'], 
+                  review_data['take_again'], review_data['load_heavy'], review_data['office_hours'], 
+                  review_data['helped_learn'], review_data['stim_interest'], 
+                  review_data['description']))
     conn.commit()
 
 
@@ -217,28 +205,12 @@ def get_review_by_id(conn, rid):
     return curs.fetchone()
 
 
-def update_review(conn, rid, prof_name, prof_rating, difficulty, credit, 
-                  sem, year, take_again, load_heavy, office_hours, helped_learn, 
-                  stim_interest, description):
+def update_review(conn, updated_data):
     '''
     Updates the review with the given review id.
 
     param conn: database connection
-    param rid: the review id
-    param prof_name: the name of the professor who taught the course
-    param prof_rating: rating given for that professor ('1','2','3','4','5')
-    param prof_id: the professor's id as specified in the professor table
-    param difficulty: the course's difficulty ('Easy','Medium','Hard')
-    param credit: whether the course was taken for credit or not ('Credit','Credit-Non','Mandatory Credit-Non')
-    param sem: the semester in which the course was taken ('Fall','Winter','Spring','Summer')
-    param year: the year in which the course was taken
-    param take_again: whether the rater would take the course again ('Yes','No')
-    param load_heavy: describes the courseload ('Light','Medium','Heavy')
-    param office_hours: describe the professor's office hours 
-        ('Always Available','Sometimes Available','Never Available','Need to Schedule')
-    param helped_learn: describe whether the professor helped their learning ('Yes','No')
-    param stim_interest: describe whether the course was interesting ('Yes','No')
-    param description: a written description of the course provided by the reviewer
+    param updated_data: dictionary containing updated review data
     '''
     curs = dbi.dict_cursor(conn)
     curs.execute('''update review set 
@@ -255,9 +227,12 @@ def update_review(conn, rid, prof_name, prof_rating, difficulty, credit,
                  stim_interest = %s,
                  description = %s
                  where rid = %s''', 
-                 [prof_name, prof_rating, difficulty, credit, 
-                  sem, year, take_again, load_heavy, office_hours, helped_learn, 
-                  stim_interest, description, rid])
+                 [updated_data['prof_name'], updated_data['prof_rating'], 
+                  updated_data['difficulty'], updated_data['credit'], 
+                  updated_data['sem'], updated_data['year'], updated_data['take_again'], 
+                  updated_data['load_heavy'], updated_data['office_hours'], 
+                  updated_data['helped_learn'], updated_data['stim_interest'], 
+                  updated_data['description'], updated_data['rid']])
 
     conn.commit()
 
