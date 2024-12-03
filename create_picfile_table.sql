@@ -9,4 +9,12 @@ CREATE TABLE picfile (
     foreign key (`uid`) references `user` (`uid`) 
         on delete cascade on update cascade
 );
-describe picfile;
+
+-- default user
+-- INSERT INTO `user` (`uid`,`name`,`profile_pic`,`email`,`password`)
+-- VALUES (0, 'default_user',NULL,NULL,NULL);
+
+-- INSERT INTO picfile (`uid`, `filename`) 
+-- VALUES (0, 'default.jpg');
+
+DESCRIBE picfile;

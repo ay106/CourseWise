@@ -182,7 +182,10 @@ def get_profile_reviews(conn, uid):
     submitted
     '''
     curs = dbi.dict_cursor(conn)
-    curs.execute('''SELECT *
+    curs.execute('''SELECT course_id, user_id, prof_name, prof_rating, prof_id,
+                            difficulty, credit, sem, year, take_again, 
+                            load_heavy, office_hours, helped_learn, 
+                            stim_interest, description, last_updated
                     FROM review r
                     INNER JOIN course c on r.course_id = c.cid
                     INNER JOIN user u ON r.user_id = u.uid
