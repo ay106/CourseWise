@@ -253,19 +253,16 @@ def profile():
 @app.route('/pic/<uid>')
 def pic(uid):
     conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    numrows = curs.execute(
-        '''select filename from picfile where uid = %s''',
-        [uid])
-    if numrows == 0:
-        flash('No picture for {}'.format(uid))
-        default_pic = os.path.join(app.config['UPLOADS'], 'default.jpg')
-        if os.path.exists(default_pic):
-            return send_file(default_pic)
-        else:
-            return 'Default image not found', 404
-    row = curs.fetchone()
-    return send_from_directory(app.config['UPLOADS'],row['filename'])
+    picfile = db.get_pic(conn, uid)
+
+
+    if not picfile:
+        flash('Error finding picture')
+        return redirect(url_for('profile'))
+    # default_pic = os.path.join(app.config['UPLOADS'], 'default.jpg')
+    # if os.path.exists(default_pic):
+    #     return send_file(default_pic)
+    return send_from_directory(app.config['UPLOADS'],picfile['filename'])
 
 
 @app.route('/profile/upload', methods=["GET", "POST"])

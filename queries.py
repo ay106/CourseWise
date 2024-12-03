@@ -185,7 +185,8 @@ def get_profile_reviews(conn, uid):
     curs.execute('''SELECT course_id, user_id, prof_name, prof_rating, prof_id,
                             difficulty, credit, sem, year, take_again, 
                             load_heavy, office_hours, helped_learn, 
-                            stim_interest, description, last_updated
+                            stim_interest, description, last_updated, 
+                            c.course_code, c.name
                     FROM review r
                     INNER JOIN course c on r.course_id = c.cid
                     INNER JOIN user u ON r.user_id = u.uid
@@ -255,6 +256,22 @@ def delete_review(conn, rid):
     curs.execute('''delete from review where rid = %s''', 
                  [rid])
     conn.commit()
+
+def get_pic(conn, uid):
+    '''
+    Gets picture with uid.
+
+    param conn: database connection
+    param uid: user id
+    '''
+    curs = dbi.dict_cursor(conn)
+    numrows = curs.execute(
+        '''select filename from picfile where uid = %s''',
+        [uid])
+    if numrows == 0:
+        return None
+    return curs.fetchone()
+    
 
 def upload_pic(conn, uid, filename):
     '''
