@@ -77,11 +77,11 @@ def get_course_reviews(conn, cid):
     return: list of dictionaries containing review data for each review
     '''
     curs = dbi.dict_cursor(conn)
-    sql_reviews = '''SELECT review.*, u.name AS user_name
-                        FROM review
-                        INNER JOIN course c ON review.course_id = c.cid
-                        INNER JOIN user u ON review.user_id = u.uid
-                        WHERE review.course_id = %s'''
+    sql_reviews = '''SELECT r.rid, r.course_id, r.user_id, r.difficulty, r.credit, r.prof_name, r.prof_id, r.prof_rating, r.sem, r.year, r.take_again, r.load_heavy, r.office_hours, r.helped_learn, r.stim_interest, r.description, r.last_updated, u.name AS user_name
+                    FROM review r
+                    INNER JOIN course c ON r.course_id = c.cid
+                    INNER JOIN user u ON review.user_id = u.uid
+                    WHERE r.course_id = %s'''
     curs.execute(sql_reviews, [cid])
     return curs.fetchall()
 
