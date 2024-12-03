@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 import os
+import pymysql
 import cs304dbi as dbi
 import queries as db
 
@@ -147,7 +148,11 @@ def add_review(course_code, cid):
             course_data = db.get_course_info_by_cid(conn, int_cid)
             dept_id = course_data['did']
 
-            db.insert_professor(conn, review_data['prof_name'], dept_id)
+            # make thread-safe 
+            try: 
+                db.insert_professor(conn, review_data['prof_name'], dept_id)
+            except pymysql.IntegrityError as err:
+                print('Unable to insert {} due to {}'.format(review_data['prof_name'],repr(err)))
 
         # get professor id 
         prof = db.get_prof_by_name(conn, review_data['prof_name'])

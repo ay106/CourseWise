@@ -126,7 +126,8 @@ def get_prof_by_name(conn, prof_name):
     return: a dictionary holding the professor's data from the professor table
     '''    
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select * from professor where name=%s''',[prof_name])
+    curs.execute('''select pid, name, department_id from professor where name=%s''',
+                 [prof_name])
     return curs.fetchone()
 
 
@@ -191,7 +192,7 @@ def get_profile_reviews(conn, uid):
 
 def get_review_by_id(conn, rid):
     '''
-    Gets review data for the given review id.
+    Gets the data for the given review id.
 
     param conn: database connection
     param rid: review id
@@ -199,7 +200,10 @@ def get_review_by_id(conn, rid):
     return: a dictionary holding the review data
     '''
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select * from review
+    curs.execute('''select rid, course_id, user_id, difficulty, credit, 
+                 prof_name, prof_id, prof_rating, sem, year, take_again, 
+                 load_heavy, office_hours, helped_learn, stim_interest, description, 
+                 last_updated from review
                  where rid = %s''', 
                  [rid])
     return curs.fetchone()
