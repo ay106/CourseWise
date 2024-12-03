@@ -1,11 +1,12 @@
 # Authors: Vaishu, Ashley, Kathy, and Mukhlisa
 
 from flask import (Flask, render_template, make_response, url_for, request,
-                   redirect, flash, session, send_from_directory, jsonify)
+                   redirect, flash, session, send_from_directory, send_file, jsonify)
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
-
+import os
+import pymysql
 import cs304dbi as dbi
 import queries as db
 
@@ -15,6 +16,10 @@ app.secret_key = secrets.token_hex()
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+
+# new for file upload
+app.config['UPLOADS'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
 departments = None
 
@@ -26,6 +31,7 @@ def home():
     session['email'] = 'jc103@wellesley.edu'
     session['name'] = 'Vaishu Chintam'
 
+    # get all department names and cache it
     global departments 
     if departments is None:
         departments = db.get_departments(conn)
@@ -72,7 +78,7 @@ def add_course():
             return redirect(url_for('add_course'))
 
         #check if course already exists
-        existing_course = db.get_course_by_code(conn, course_code)
+        existing_course = db.get_course_by_course_code(conn, course_code)
         if existing_course:
             flash('This course already exists in the database.')
             return redirect(url_for('add_course'))
@@ -110,79 +116,57 @@ def display_course(cid):
                            length = len(info_review),
                            departments=departments)
 
-@app.route('/add_course', methods=['GET', 'POST'])
-def add_course():
-    conn = dbi.connect()
-    departments = db.get_departments(conn)
-    if request.method == 'POST':
-        course_code = request.form.get('course_code')
-        course_name = request.form.get('course_name')
-        department = request.form.get('department')
-        
-         # check if course code is correct format
-        try:
-            parts = course_code.split()
-            if len(parts) != 2 or not parts[0].isalpha() or not parts[1].isdigit():
-                raise ValueError  # Raise an error if the format is invalid
-            
-             # Capitalize the letter part
-            parts[0] = parts[0].upper() 
-            course_code = ' '.join(parts)
-        except ValueError:
-            flash('Invalid course code format. Format must be course department letter then course number (e.g., "CS 101").')
-            return redirect(url_for('add_course'))
-
-        #check if course already exists
-
-        existing_course = db.get_course_by_code(conn, course_code)
-        if existing_course:
-            flash('This course already exists in the database.')
-            return redirect(url_for('add_course'))
-        dept_id = db.get_department_id(conn, department) 
-        db.insert_course(conn, course_code, course_name, dept_id)
-        flash('Course added successfully!')
-        return redirect(url_for('select_department', department=department))  # Redirect back to the department page
-    else:
-        return render_template('add_courses.html', page_title='Add Course', departments=departments) 
-
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):
+    # course_code is the department abbrev. and course num (ex. CS 111)
+    # cid is the course id number as stored in the course table
     if request.method == 'POST':
         conn = dbi.connect()
 
-        prof_name = request.form.get('prof_name')
-        prof_rating = request.form.get('prof_rating')
-        difficulty = request.form.get('difficulty')
-        credit = request.form.get('credit')
-        sem = request.form.get('sem')
-        year = request.form.get('year')
-        take_again = request.form.get('take_again')
-        load_heavy = request.form.get('load_heavy')
-        office_hours = request.form.get('office_hours')
-        helped_learn = request.form.get('helped_learn')
-        stim_interest = request.form.get('stim_interest')
-        description = request.form.get('description')
+        review_data = {
+            'prof_name': request.form.get('prof_name'),
+            'prof_rating': request.form.get('prof_rating'),
+            'difficulty': request.form.get('difficulty'),
+            'credit': request.form.get('credit'),
+            'sem': request.form.get('sem'),
+            'year': request.form.get('year'),
+            'take_again': request.form.get('take_again'),
+            'load_heavy': request.form.get('load_heavy'),
+            'office_hours': request.form.get('office_hours'),
+            'helped_learn': request.form.get('helped_learn'),
+            'stim_interest': request.form.get('stim_interest'),
+            'description': request.form.get('description')
+        }
 
         user_id = session.get('uid') # get user id from session 
         int_cid = int(cid)
 
         # insert professor into professor table if prof_name not already in the table
-        prof_data = db.get_prof_by_name(conn, prof_name)
+        prof_data = db.get_prof_by_name(conn, review_data['prof_name'])
         if not prof_data:
             # get department id for the course
             course_data = db.get_course_info_by_cid(conn, int_cid)
             dept_id = course_data['did']
 
-            db.insert_professor(conn, prof_name, dept_id)
+            # make thread-safe 
+            try: 
+                db.insert_professor(conn, review_data['prof_name'], dept_id)
+            except pymysql.IntegrityError as err:
+                print('Unable to insert {} due to {}'.format(review_data['prof_name'],repr(err)))
 
         # get professor id 
-        prof = db.get_prof_by_name(conn, prof_name)
+        prof = db.get_prof_by_name(conn, review_data['prof_name'])
         prof_id = prof['pid']
 
+        # add user id, prof id, and course id to review_data 
+        review_data.update({
+            'cid': int_cid,
+            'user_id': user_id,
+            'prof_id': prof_id
+        }) 
+
         # insert review
-        db.insert_review(conn, int_cid, user_id, prof_name, prof_rating, prof_id, difficulty, 
-                         credit, sem, year, take_again, load_heavy, office_hours, helped_learn, 
-                         stim_interest, description)
+        db.insert_review(conn, review_data)
 
         flash("Review added successfully!")
         return redirect(url_for('display_course', cid=cid))
@@ -211,23 +195,27 @@ def edit_review(course_code, rid):
 
     if request.method == 'POST':
         # get updated data from form submission
-        prof_name = request.form.get('prof_name')
-        prof_rating = request.form.get('prof_rating')
-        difficulty = request.form.get('difficulty')
-        credit = request.form.get('credit')
-        sem = request.form.get('sem')
-        year = request.form.get('year')
-        take_again = request.form.get('take_again')
-        load_heavy = request.form.get('load_heavy')
-        office_hours = request.form.get('office_hours')
-        helped_learn = request.form.get('helped_learn')
-        stim_interest = request.form.get('stim_interest')
-        description = request.form.get('description')
+        updated_data = {
+            'prof_name': request.form.get('prof_name'),
+            'prof_rating': request.form.get('prof_rating'),
+            'difficulty': request.form.get('difficulty'),
+            'credit': request.form.get('credit'),
+            'sem': request.form.get('sem'),
+            'year': request.form.get('year'),
+            'take_again': request.form.get('take_again'),
+            'load_heavy': request.form.get('load_heavy'),
+            'office_hours': request.form.get('office_hours'),
+            'helped_learn': request.form.get('helped_learn'),
+            'stim_interest': request.form.get('stim_interest'),
+            'description': request.form.get('description')
+        }
+
+        updated_data.update({
+            'rid': rid
+        }) 
 
         # update the review in the database
-        db.update_review(conn, rid, prof_name, prof_rating, difficulty, credit, sem, year, 
-                         take_again, load_heavy, office_hours, helped_learn, stim_interest, 
-                         description)
+        db.update_review(conn, updated_data)
         flash("Review updated successfully!", "success")
         return redirect(url_for('profile'))
     else:
@@ -256,10 +244,57 @@ def profile():
 
     return render_template('profile.html', page_title='Profile', 
                                            uid=uid, 
+                                           src=url_for('pic',uid=uid),
                                            email=email, 
                                            name=name,
                                            reviews=info_review,
                                            departments=departments)
+
+@app.route('/pic/<uid>')
+def pic(uid):
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    numrows = curs.execute(
+        '''select filename from picfile where uid = %s''',
+        [uid])
+    if numrows == 0:
+        flash('No picture for {}'.format(uid))
+        default_pic = os.path.join(app.config['UPLOADS'], 'default.jpg')
+        if os.path.exists(default_pic):
+            return send_file(default_pic)
+        else:
+            return 'Default image not found', 404
+    row = curs.fetchone()
+    return send_from_directory(app.config['UPLOADS'],row['filename'])
+
+
+@app.route('/profile/upload', methods=["GET", "POST"])
+def file_upload():
+    conn = dbi.connect()
+    uid = session.get('uid')
+
+    if request.method == 'GET':
+        return render_template('add_profile_pic.html',src='',uid='')
+    else:
+        try:
+            f = request.files['pic']
+            user_filename = f.filename
+            ext = user_filename.split('.')[-1]
+            filename = secure_filename('{}.{}'.format(uid,ext))
+            pathname = os.path.join(app.config['UPLOADS'],filename)
+
+            # Check if file with the same uid exists
+            existing_files = [file for file in os.listdir(app.config['UPLOADS']) if file.startswith(f"{uid}.")]
+            for existing_file in existing_files:
+                os.remove(os.path.join(app.config['UPLOADS'], existing_file))
+
+            f.save(pathname)
+            db.upload_pic(conn, uid, filename)
+            flash('Upload successful')
+            return redirect(url_for('profile'))
+        except Exception as err:
+            flash('Upload failed {why}'.format(why=err))
+            return render_template('profile.html')
 
 
 if __name__ == '__main__':

@@ -4,13 +4,17 @@
 <div class="container pt-3 d-flex justify-content-center align-items-center">
     <div class="profile-container"> 
 
+        <p> <img src="{{ src }}"></p>
+        
+        <a href="{{ url_for('file_upload') }}" class="btn btn-primary">Upload Picture</a>
+
         <div class="user-info"> 
             <h1>{{ name }}</h1>
             <p>{{ email }}</p>
         </div>
 
         <div class="user-reviews"> 
-            <h3>My Reviews</h3>
+            <h2>My Reviews</h2>
             <ul class="review-list">
                 {% for r in reviews %}
                 <h3><a href="{{ url_for('display_course', cid = r.cid) }}" class="course">{{ r.course_code }}: {{ r.name }}</a></h3>
