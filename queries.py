@@ -293,9 +293,18 @@ def upload_pic(conn, uid, filename):
     conn.commit()
 
 def insert_user(conn, email, name, password, verbose=False):
-    '''inserts given username & password into the userpass table.  
-Returns three values: the uid, whether there was a duplicate key error, 
-and either false or an exception object.
+    '''
+    Inserts given email, name , and password into the user table. 
+    Returns three values: the uid, whether there was a duplicate key error, 
+    and either false or an exception object.
+
+    param conn: database connection
+    param email: email
+    param name: name
+    param password: password
+
+    return: a tuple of 3 elements: the uid, whether there was a duplicate key error 
+    (True/False), and either false or an exception object
     '''
     hashed = bcrypt.hashpw(password.encode('utf-8'),
                            bcrypt.gensalt())
@@ -322,9 +331,18 @@ and either false or an exception object.
             return (False, False, err)
 
 def login_user(conn, email, password):
-    '''tries to log the user in given username & password. 
-Returns True if success and returns the uid as the second value.
-Otherwise, False, False.'''
+    '''
+    Tries to log the user in given email & password. Returns True if 
+    success and returns the uid and name as the second and thirdvalue. 
+    Otherwise, False, False, False.
+
+    param conn: database connection
+    param email: email address
+    param password: password
+
+    return: a tuple of 3 elements: whether or not it was a success (True/False), 
+    user id, and name 
+    '''
     curs = dbi.cursor(conn)
     curs.execute('''SELECT uid, name, password FROM user 
                     WHERE email = %s''',
