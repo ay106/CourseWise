@@ -1,5 +1,6 @@
 import cs304dbi as dbi
-
+import pymysql
+import bcrypt
 
 def get_departments(conn):
     '''
@@ -40,7 +41,8 @@ def get_course_by_course_code(conn, course_code):
     return: a dictionary containing the course data
     '''
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select * from course where course_code = %s''', 
+    curs.execute('''select cid, did, course_code 
+                 from course where course_code = %s''', 
                  [course_code])
     return curs.fetchone()
 
@@ -289,3 +291,72 @@ def upload_pic(conn, uid, filename):
             on duplicate key update filename = %s''',
         [uid, filename, filename])
     conn.commit()
+
+def insert_user(conn, email, name, password, verbose=False):
+    '''
+    Inserts given email, name , and password into the user table. 
+    Returns three values: the uid, whether there was a duplicate key error, 
+    and either false or an exception object.
+
+    param conn: database connection
+    param email: email
+    param name: name
+    param password: password
+
+    return: a tuple of 3 elements: the uid, whether there was a duplicate key error 
+    (True/False), and either false or an exception object
+    '''
+    hashed = bcrypt.hashpw(password.encode('utf-8'),
+                           bcrypt.gensalt())
+    curs = dbi.cursor(conn)
+    try: 
+        curs.execute('''INSERT INTO user(email, name, password) 
+                        VALUES(%s, %s, %s)''',
+                     [email, name, hashed.decode('utf-8')])
+        conn.commit()
+        curs.execute('select last_insert_id()')
+        row = curs.fetchone()
+        return (row[0], False, False)
+    except pymysql.err.IntegrityError as err:
+        details = err.args
+        if verbose:
+            print('error inserting user',details)
+        if details[0] == pymysql.constants.ER.DUP_ENTRY:
+            if verbose:
+                print('duplicate key for email {}'.format(email))
+            return (False, True, False)
+        else:
+            if verbose:
+                print('some other error!')
+            return (False, False, err)
+
+def login_user(conn, email, password):
+    '''
+    Tries to log the user in given email & password. Returns True if 
+    success and returns the uid and name as the second and thirdvalue. 
+    Otherwise, False, False, False.
+
+    param conn: database connection
+    param email: email address
+    param password: password
+
+    return: a tuple of 3 elements: whether or not it was a success (True/False), 
+    user id, and name 
+    '''
+    curs = dbi.cursor(conn)
+    curs.execute('''SELECT uid, name, password FROM user 
+                    WHERE email = %s''',
+                 [email])
+    row = curs.fetchone()
+    if row is None:
+        # no such user
+        return (False, False, False)
+    uid, name, hashed = row
+    hashed2_bytes = bcrypt.hashpw(password.encode('utf-8'),
+                                  hashed.encode('utf-8'))
+    hashed2 = hashed2_bytes.decode('utf-8')
+    if hashed == hashed2:
+        return (True, uid, name)
+    else:
+        # password incorrect
+        return (False, False, False)
