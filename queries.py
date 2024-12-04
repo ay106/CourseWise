@@ -40,7 +40,8 @@ def get_course_by_course_code(conn, course_code):
     return: a dictionary containing the course data
     '''
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select * from course where course_code = %s''', 
+    curs.execute('''select cid, did, course_code 
+                 from course where course_code = %s''', 
                  [course_code])
     return curs.fetchone()
 
