@@ -85,8 +85,13 @@ def add_course():
 
         #if successful and course does not exist then insert course
         dept_id = db.get_department_id(conn, department) 
-        db.insert_course(conn, course_code, course_name, dept_id)
-        flash('Course added successfully!')
+        # make thread-safe
+        try:
+            db.insert_course(conn, course_code, course_name, dept_id)
+            flash('Course added successfully!')
+        except pymysql.IntegrityError as err:
+                print('Unable to insert {} due to {}'.format(course_code,repr(err))) 
+        
         return redirect(url_for('select_department', department=department))  # Redirect back to the department page
     else:
         return render_template('add_courses.html', page_title='Add Course', departments=departments) 
