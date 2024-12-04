@@ -16,6 +16,10 @@
 </div>
 <div class="container pt-3">
     <p>Missing a course?</p>
-    <a href="{{ url_for('add_course')}}" class="btn">Add Course</a>
+    {% if session.get('logged_in') %}
+        <a href="{{ url_for('add_course')}}" class="btn">Add Course</a>
+    {% else %}
+        <p><em>Please login to add a course.</em></p>
+    {% endif %}
 </div>
 {% endblock %}
