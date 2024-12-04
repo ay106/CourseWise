@@ -260,13 +260,11 @@ def pic(uid):
     conn = dbi.connect()
     picfile = db.get_pic(conn, uid)
 
-
-    if not picfile:
-        flash('Error finding picture')
-        return redirect(url_for('profile'))
-    # default_pic = os.path.join(app.config['UPLOADS'], 'default.jpg')
-    # if os.path.exists(default_pic):
-    #     return send_file(default_pic)
+    if picfile == None:
+        flash('No picture uploaded')
+        return send_from_directory(app.config['UPLOADS'], 'default.jpg')
+        # return redirect(url_for('profile'))
+    
     return send_from_directory(app.config['UPLOADS'],picfile['filename'])
 
 
