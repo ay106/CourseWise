@@ -26,10 +26,6 @@ departments = None
 @app.route('/')
 def home():
     conn = dbi.connect()
-    # hardcode user values since draft version does not have sign-up/login functionality
-    # session['uid'] = 1
-    # session['email'] = 'jc103@wellesley.edu'
-    # session['name'] = 'Vaishu Chintam'
 
     # get all department names and cache it
     global departments 
@@ -61,7 +57,7 @@ def signup():
         if other_err:
             raise other_err
         elif is_dup:
-            flash('Sorry; that username is taken')
+            flash('Sorry, that email is taken')
             return redirect( url_for('signup'))
         else:
             ## success
@@ -82,7 +78,7 @@ def login():
         if ok:
             ## success
             print('LOGIN', email)
-            flash('successfully logged in as '+email)
+            flash('Successfully logged in as '+email)
             session['email'] = email
             session['uid'] = uid
             session['name'] = name
@@ -94,16 +90,12 @@ def login():
 
 @app.route('/logout/')
 def logout():
-    if 'email' in session:
-        session.pop('email')
-        session.pop('uid')
-        session.pop('name')
-        session.pop('logged_in')
-        flash('You are logged out')
-        return redirect(url_for('home'))
-    else:
-        flash('you are not logged in. Please login or join')
-        return redirect( url_for('home') )
+    session.pop('email')
+    session.pop('uid')
+    session.pop('name')
+    session.pop('logged_in')
+    flash('You are logged out')
+    return redirect(url_for('home'))
 
 @app.route('/department/')
 def select_department():
