@@ -157,27 +157,55 @@ def add_course():
 @app.route('/courses/<cid>')
 def display_course(cid):
     conn = dbi.connect()
-    # get all reviews for course
     int_cid = int(cid)
+
+    # Get all reviews for the course
     info_review = db.get_course_reviews(conn, int_cid)
 
-    ## below will capture course_code and name from cid
+    # Get course details (course code and name)
     info_course = db.get_course_info_by_cid(conn, int_cid)
 
     if not info_course:
-        # If no course is found with the given cid, redirect to home page
         flash('Course not found.')
         return redirect(url_for('home'))
 
     if len(info_review) == 0:
         flash('No reviews found for this course.')
 
-    return render_template('course_reviews.html', 
-                           page_title='Course Reviews',
-                           reviews = info_review,
-                           course = info_course,
-                           length = len(info_review),
-                           departments=departments)
+    # Extract unique professors, semesters, and years for dropdowns
+    professors = sorted({r['prof_name'] for r in info_review})
+    semesters = sorted({r['sem'] for r in info_review})
+    years = sorted({r['year'] for r in info_review}, reverse=True)
+
+    # Get selected filters
+    selected_prof = request.args.get('pid')
+    selected_sem = request.args.get('sem')
+    selected_year = request.args.get('year')
+
+    # Apply filters
+    if selected_prof:
+        info_review = [r for r in info_review if r['prof_name'] == selected_prof]
+
+    if selected_sem:
+        info_review = [r for r in info_review if r['sem'] == selected_sem]
+
+    if selected_year:
+        info_review = [r for r in info_review if str(r['year']) == selected_year]
+
+    return render_template(
+        'course_reviews.html',
+        page_title='Course Reviews',
+        reviews=info_review,
+        course=info_course,
+        length=len(info_review),
+        professors=professors,
+        semesters=semesters,
+        years=years,
+        selected_prof=selected_prof,
+        selected_sem=selected_sem,
+        selected_year=selected_year
+    )
+
 
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):

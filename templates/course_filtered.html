@@ -4,11 +4,10 @@
 <div class="container pt-4">
     <div class="course_reviews">
         <!-- Form for Filtering -->
-        <form action="{{ url_for('display_course', cid=course.cid) }}" method="get" class="form-inline mb-4">
-            <!-- Filter by Professor -->
-            <div class="form-group mr-3">
+        <form action="{{ url_for('courseview', cid=course.cid) }}" method="get" class="form-inline mb-4">
+            <div class="form-group">
                 <label for="pid" class="mr-2">Filter by Professor:</label>
-                <select id="pid" name="pid" class="form-control">
+                <select id="pid" name="pid" class="form-control mr-2">
                     <option value="">All Professors</option>
                     {% for prof in professors %}
                         <option value="{{ prof }}" {% if prof == request.args.get('pid') %}selected{% endif %}>
@@ -17,37 +16,8 @@
                     {% endfor %}
                 </select>
             </div>
-        
-            <!-- Filter by Semester -->
-            <div class="form-group mr-3">
-                <label for="sem" class="mr-2">Filter by Semester:</label>
-                <select id="sem" name="sem" class="form-control">
-                    <option value="">All Semesters</option>
-                    {% for semester in semesters %}
-                        <option value="{{ semester }}" {% if semester == request.args.get('sem') %}selected{% endif %}>
-                            {{ semester }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        
-            <!-- Filter by Year -->
-            <div class="form-group mr-3">
-                <label for="year" class="mr-2">Filter by Year:</label>
-                <select id="year" name="year" class="form-control">
-                    <option value="">All Years</option>
-                    {% for y in years %}
-                        <option value="{{ y }}" {% if y == request.args.get('year') %}selected{% endif %}>
-                            {{ y }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        
-            <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">Filter</button>
         </form>
-        
 
         <div class="form-group">
             <div class="row">
