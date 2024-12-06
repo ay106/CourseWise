@@ -17,9 +17,21 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="{{url_for('home')}}">CourseWise</a>
     <ul class="nav navbar-nav navbar-right"> 
-      <li> 
-        <a class="nav-link" href="{{url_for('profile')}}">Profile</a>
-      </li> 
+      {% if 'email' in session %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('profile')}}">Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('logout')}}">Logout</a>
+        </li>
+      {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('login')}}">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('signup')}}">Sign Up</a>
+        </li>
+      {% endif %} 
     </ul>
   </div>
 </nav>
@@ -39,7 +51,7 @@
 <main>
   <div class="container">
     <div class="container pt-3">
-      <h1>Welcome to Coursewise!</h1>
+      <h1>Welcome to CourseWise!</h1>
       <form method="GET" action="{{url_for('select_department')}}">
         <div class="form-group">
           <label for="department">Select a department:</label>

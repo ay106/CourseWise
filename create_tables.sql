@@ -1,18 +1,20 @@
 use cwise_db;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
 DROP TABLE IF EXISTS review;
 DROP TABLE IF EXISTS course;
 DROP TABLE IF EXISTS professor;
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS department;
 
+SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE user (
   `uid` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50),
-  `profile_pic` varchar(100),
-  `email` varchar(30),
-  `password` varchar(30)
+  `email` varchar(30) UNIQUE,
+  `password` char(60)
 );
 
 CREATE TABLE department (

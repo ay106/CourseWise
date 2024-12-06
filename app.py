@@ -26,10 +26,6 @@ departments = None
 @app.route('/')
 def home():
     conn = dbi.connect()
-    # hardcode user values since draft version does not have sign-up/login functionality
-    session['uid'] = 1
-    session['email'] = 'jc103@wellesley.edu'
-    session['name'] = 'Vaishu Chintam'
 
     # get all department names and cache it
     global departments 
@@ -38,6 +34,68 @@ def home():
 
     return render_template('base.html', page_title='Home', departments=departments)
 
+@app.route('/signup/', methods=["GET", "POST"])
+def signup():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        name = request.form.get('name')
+        passwd1 = request.form.get('password1')
+        passwd2 = request.form.get('password2')
+
+        incorrect_info = False
+        if not email.endswith('@wellesley.edu'):
+            flash('Email must be a valid Wellesley College email (@wellesley.edu)')
+            incorrect_info = True
+        if passwd1 != passwd2:
+            flash('passwords do not match')
+            incorrect_info = True
+        if incorrect_info:
+            return redirect( url_for('signup'))
+        
+        conn = dbi.connect()
+        (uid, is_dup, other_err) = db.insert_user(conn, email, name, passwd1)
+        if other_err:
+            raise other_err
+        elif is_dup:
+            flash('Sorry, that email is taken')
+            return redirect( url_for('signup'))
+        else:
+            ## success
+            session['email'] = email
+            session['uid'] = uid
+            session['name'] = name
+            session['logged_in'] = True
+            return redirect(url_for('home'))
+    return render_template('signup.html', page_title='Signup')
+
+@app.route('/login/', methods=["GET", "POST"])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        passwd = request.form.get('password')
+        conn = dbi.connect()
+        (ok, uid, name) = db.login_user(conn, email, passwd)
+        if ok:
+            ## success
+            print('LOGIN', email)
+            flash('Successfully logged in as '+email)
+            session['email'] = email
+            session['uid'] = uid
+            session['name'] = name
+            session['logged_in'] = True
+            return redirect(url_for('home'))
+        else:
+            flash('Login incorrect, please try again or sign up')
+    return render_template('login.html', page_title='Login')
+
+@app.route('/logout/')
+def logout():
+    session.pop('email')
+    session.pop('uid')
+    session.pop('name')
+    session.pop('logged_in')
+    flash('You are logged out')
+    return redirect(url_for('home'))
 
 @app.route('/department/')
 def select_department():
@@ -85,8 +143,13 @@ def add_course():
 
         #if successful and course does not exist then insert course
         dept_id = db.get_department_id(conn, department) 
-        db.insert_course(conn, course_code, course_name, dept_id)
-        flash('Course added successfully!')
+        # make thread-safe
+        try:
+            db.insert_course(conn, course_code, course_name, dept_id)
+            flash('Course added successfully!')
+        except pymysql.IntegrityError as err:
+                print('Unable to insert {} due to {}'.format(course_code,repr(err))) 
+        
         return redirect(url_for('select_department', department=department))  # Redirect back to the department page
     else:
         return render_template('add_courses.html', page_title='Add Course', departments=departments) 
@@ -253,19 +316,14 @@ def profile():
 @app.route('/pic/<uid>')
 def pic(uid):
     conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    numrows = curs.execute(
-        '''select filename from picfile where uid = %s''',
-        [uid])
-    if numrows == 0:
-        flash('No picture for {}'.format(uid))
-        default_pic = os.path.join(app.config['UPLOADS'], 'default.jpg')
-        if os.path.exists(default_pic):
-            return send_file(default_pic)
-        else:
-            return 'Default image not found', 404
-    row = curs.fetchone()
-    return send_from_directory(app.config['UPLOADS'],row['filename'])
+    picfile = db.get_pic(conn, uid)
+
+    if picfile == None:
+        flash('No picture uploaded')
+        return send_from_directory(app.config['UPLOADS'], 'default.jpg')
+        # return redirect(url_for('profile'))
+    
+    return send_from_directory(app.config['UPLOADS'],picfile['filename'])
 
 
 @app.route('/profile/upload', methods=["GET", "POST"])
