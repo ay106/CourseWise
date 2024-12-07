@@ -33,7 +33,8 @@ def home():
     if departments is None:
         departments = db.get_departments(conn)
 
-    return render_template('base.html', page_title='Home', departments=departments)
+    return render_template('base.html', page_title='Home', 
+                           departments=departments)
 
 @app.route('/signup/', methods=["GET", "POST"])
 def signup():
@@ -133,7 +134,8 @@ def add_course():
             parts[0] = parts[0].upper() 
             course_code = ' '.join(parts)
         except ValueError:
-            flash('Invalid course code format. Format must be course department letter then course number (e.g., "CS 101").')
+            flash('''Invalid course code format. Format must be course 
+                  department letter then course number (e.g., "CS 101").''')
             return redirect(url_for('add_course'))
 
         #check if course already exists
@@ -151,9 +153,11 @@ def add_course():
         except pymysql.IntegrityError as err:
                 print('Unable to insert {} due to {}'.format(course_code,repr(err))) 
         
-        return redirect(url_for('select_department', department=department))  # Redirect back to the department page
+        # Redirect back to the department page
+        return redirect(url_for('select_department', department=department)) 
     else:
-        return render_template('add_courses.html', page_title='Add Course', departments=departments) 
+        return render_template('add_courses.html', page_title='Add Course', 
+                               departments=departments) 
 
 @app.route('/courses/<cid>')
 def display_course(cid):
@@ -311,7 +315,8 @@ def edit_review(course_code, rid):
         flash("Review updated successfully!", "success")
         return redirect(url_for('profile'))
     else:
-        return render_template('edit_review.html', course = course_code, review=review)
+        return render_template('edit_review.html', course = course_code, 
+                               review=review)
 
 @app.route('/delete_review/<rid>')
 def delete_review(rid):

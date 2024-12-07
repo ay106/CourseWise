@@ -59,7 +59,8 @@ def get_courses_by_department(conn, department):
     curs = dbi.dict_cursor(conn)
     if department == "All Department":
         # get all courses
-        curs.execute('''select cid, course_code, name from course order by course_code''')
+        curs.execute('''select cid, course_code, name from course
+                      order by course_code''')
     else:
         curs.execute('''select cid, course_code, course.name as name
                      from course inner join department using (did) 
@@ -79,9 +80,10 @@ def get_course_reviews(conn, cid):
     return: list of dictionaries containing review data for each review
     '''
     curs = dbi.dict_cursor(conn)
-    sql_reviews = '''SELECT r.rid, r.course_id, r.user_id, r.difficulty, r.credit, r.prof_name, 
-    r.prof_id, r.prof_rating, r.sem, r.year, r.take_again, r.load_heavy, r.office_hours, 
-    r.helped_learn, r.stim_interest, r.description, r.last_updated, u.name AS user_name
+    sql_reviews = '''SELECT r.rid, r.course_id, r.user_id, r.difficulty, 
+    r.credit, r.prof_name, r.prof_id, r.prof_rating, r.sem, r.year, 
+    r.take_again, r.load_heavy, r.office_hours, r.helped_learn, 
+    r.stim_interest, r.description, r.last_updated, u.name AS user_name
                     FROM review r
                     INNER JOIN course c ON r.course_id = c.cid
                     INNER JOIN user u ON r.user_id = u.uid
@@ -148,10 +150,12 @@ def insert_review(conn, review_data):
                                 load_heavy, office_hours, helped_learn, 
                                 stim_interest, description, last_updated)
             values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-            ''', (review_data['cid'], review_data['user_id'], review_data['prof_name'], 
-                  review_data['prof_rating'], review_data['prof_id'], review_data['difficulty'], 
-                  review_data['credit'], review_data['sem'], review_data['year'], 
-                  review_data['take_again'], review_data['load_heavy'], review_data['office_hours'], 
+            ''', (review_data['cid'], review_data['user_id'], 
+                  review_data['prof_name'], review_data['prof_rating'], 
+                  review_data['prof_id'], review_data['difficulty'], 
+                  review_data['credit'], review_data['sem'], 
+                  review_data['year'], review_data['take_again'], 
+                  review_data['load_heavy'], review_data['office_hours'], 
                   review_data['helped_learn'], review_data['stim_interest'], 
                   review_data['description']))
     conn.commit()
@@ -181,19 +185,20 @@ def get_profile_reviews(conn, uid):
     param conn: database connection
     param uid: user id 
 
-    return: a list of dictionaries containing review data for each review the user 
-    submitted
+    return: a list of dictionaries containing review data for each 
+    review the user submitted
     '''
     curs = dbi.dict_cursor(conn)
-    curs.execute('''SELECT c.course_code, c.name, c.cid, rid, course_id, user_id, prof_name, prof_rating, prof_id,
-                            difficulty, credit, sem, year, take_again, 
-                            load_heavy, office_hours, helped_learn, 
-                            stim_interest, description, last_updated, 
-                            c.course_code, c.name
-                    FROM review r
-                    INNER JOIN course c on r.course_id = c.cid
-                    INNER JOIN user u ON r.user_id = u.uid
-                    WHERE r.user_id=%s''', [uid])
+    curs.execute('''SELECT c.course_code, c.name, c.cid, rid, course_id, 
+                 user_id, prof_name, prof_rating, prof_id,
+                 difficulty, credit, sem, year, take_again, 
+                 load_heavy, office_hours, helped_learn, 
+                 stim_interest, description, last_updated, 
+                 c.course_code, c.name 
+                 FROM review r 
+                 INNER JOIN course c on r.course_id = c.cid 
+                 INNER JOIN user u ON r.user_id = u.uid 
+                 WHERE r.user_id=%s''', [uid])
     return curs.fetchall()
 
 
@@ -209,8 +214,8 @@ def get_review_by_id(conn, rid):
     curs = dbi.dict_cursor(conn)
     curs.execute('''select rid, course_id, user_id, difficulty, credit, 
                  prof_name, prof_id, prof_rating, sem, year, take_again, 
-                 load_heavy, office_hours, helped_learn, stim_interest, description, 
-                 last_updated from review
+                 load_heavy, office_hours, helped_learn, stim_interest, 
+                 description, last_updated from review
                  where rid = %s''', 
                  [rid])
     return curs.fetchone()
@@ -240,7 +245,8 @@ def update_review(conn, updated_data):
                  where rid = %s''', 
                  [updated_data['prof_name'], updated_data['prof_rating'], 
                   updated_data['difficulty'], updated_data['credit'], 
-                  updated_data['sem'], updated_data['year'], updated_data['take_again'], 
+                  updated_data['sem'], updated_data['year'], 
+                  updated_data['take_again'], 
                   updated_data['load_heavy'], updated_data['office_hours'], 
                   updated_data['helped_learn'], updated_data['stim_interest'], 
                   updated_data['description'], updated_data['rid']])
@@ -302,8 +308,8 @@ def insert_user(conn, email, name, password, verbose=False):
     param name: name
     param password: password
 
-    return: a tuple of 3 elements: the uid, whether there was a duplicate key error 
-    (True/False), and either false or an exception object
+    return: a tuple of 3 elements: the uid, whether there was a duplicate 
+    key error (True/False), and either false or an exception object
     '''
     hashed = bcrypt.hashpw(password.encode('utf-8'),
                            bcrypt.gensalt())
