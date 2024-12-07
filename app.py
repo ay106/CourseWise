@@ -3,6 +3,7 @@
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, send_file, jsonify)
 from werkzeug.utils import secure_filename
+from PIL import Image
 app = Flask(__name__)
 
 import os
@@ -354,7 +355,19 @@ def file_upload():
             for existing_file in existing_files:
                 os.remove(os.path.join(app.config['UPLOADS'], existing_file))
 
-            f.save(pathname)
+            # resize image
+            try:
+                img = Image.open(f)
+                target_width = 200
+                w_percent = target_width / float(img.size[0])
+                target_height = int(float(img.size[1]) * w_percent)
+                img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+                img.save(pathname)
+            except Exception as e:
+                flash(f'Image processing failed: {e}')
+                return redirect(url_for('file_upload'))
+
+            # f.save(pathname)
             db.upload_pic(conn, uid, filename)
             flash('Upload successful')
             return redirect(url_for('profile'))
