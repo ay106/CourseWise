@@ -350,8 +350,7 @@ def pic(uid):
     if picfile == None:
         flash('No picture uploaded')
         return send_from_directory(app.config['UPLOADS'], 'default.jpg')
-        # return redirect(url_for('profile'))
-    
+
     return send_from_directory(app.config['UPLOADS'],picfile['filename'])
 
 
