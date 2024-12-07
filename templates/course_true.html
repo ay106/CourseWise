@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<div class="container pt-4">
+    <div class="course_reviews">
+        <div class = "form-group">
+            <div class="row" for="coursereviews">
+                <h1>{{course.course_code}}: {{course.name}}</h1>
+            </div>
+            <div class="form-group" for="coursereviews">
+                <p><strong>Total Results:</strong> {{ length }}</p>
+                {% if session.get('logged_in') %}
+                    <a href="{{ url_for('add_review', course_code=course.course_code, cid=course.cid) }}" class="btn">Add Review</a>
+                {% else %}
+                    <p><em>Please login to add a review.</em></p>
+                {% endif %}
+            </div>
+        </div>
+        <br>
+        <div class="form-group" id="reviews">
+            <ul id="reviews-list">
+                {% for r in reviews %}
+                    <li class="review-box">
+                        <p><strong>Professor Name:</strong> {{ r.prof_name }} (<strong>Rating:</strong> {{ r.prof_rating }})
+                        <p><strong>Difficulty:</strong> {{ r.difficulty }}</p>
+                        <p><strong>Credit Type:</strong> {{ r.credit }}</p>
+                        <p><strong>Semester:</strong> {{ r.sem }} {{ r.year }}</p>
+                        <p><strong>Take Again:</strong> {{ r.take_again }}</p>
+                        <p><strong>Workload:</strong> {{ r.load_heavy }}</p>
+                        <p><strong>Office Hours Availability:</strong> {{ r.office_hours }}</p>
+                        <p><strong>Helped Me Learn:</strong> {{ r.helped_learn }}</p>
+                        <p><strong>Stimulated Interest:</strong> {{ r.stim_interest }}</p>
+                        <p><strong>Review:</strong> {{ r.description }}</p>
+                        <p><em>Last Updated:</em> {{ r.last_updated }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+    </div>
+</div>
+
+{% endblock %}

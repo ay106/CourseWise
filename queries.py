@@ -89,7 +89,6 @@ def get_course_reviews(conn, cid):
     curs.execute(sql_reviews, [cid])
     return curs.fetchall()
 
-
 def get_course_info_by_cid(conn, cid):
     '''
     Gets course info for the given course id.

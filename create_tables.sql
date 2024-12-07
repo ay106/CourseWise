@@ -13,7 +13,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE user (
   `uid` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50),
-  `email` varchar(30),
+  `email` varchar(30) UNIQUE,
   `password` char(60)
 );
 
