@@ -52,9 +52,16 @@
   <div class="container">
     <div class="container pt-3">
       <h1>Welcome to CourseWise!</h1>
+      <p>This applications is for Wellesley College students to provide reviews on courses
+        offered at the college. We hope this assists students when deciding whether or not
+        to take a certain course.
+      </p>
+
+      <br>
+      
       <form method="GET" action="{{url_for('select_department')}}">
         <div class="form-group">
-          <label for="department">Select a department:</label>
+          <label for="department"><b>Select a department:</b></label>
           <select class="form-control" name="department" id="department">
             <option value="All Department">All Departments</option>
               {% for department in departments %}
