@@ -83,7 +83,7 @@ def get_course_reviews(conn, cid):
     sql_reviews = '''SELECT r.rid, r.course_id, r.user_id, r.difficulty, 
     r.credit, r.prof_name, r.prof_id, r.prof_rating, r.sem, r.year, 
     r.take_again, r.load_heavy, r.office_hours, r.helped_learn, 
-    r.stim_interest, r.description, r.last_updated, u.name AS user_name
+    r.stim_interest, r.description, r.last_updated, r.rating, u.name AS user_name
                     FROM review r
                     INNER JOIN course c ON r.course_id = c.cid
                     INNER JOIN user u ON r.user_id = u.uid
@@ -131,7 +131,8 @@ def get_prof_by_name(conn, prof_name):
     return: a dictionary holding the professor's data from the professor table
     '''    
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select pid, name, department_id from professor where name=%s''',
+    curs.execute('''select pid, name, department_id 
+                 from professor where name=%s''',
                  [prof_name])
     return curs.fetchone()
 
@@ -193,8 +194,7 @@ def get_profile_reviews(conn, uid):
                  user_id, prof_name, prof_rating, prof_id,
                  difficulty, credit, sem, year, take_again, 
                  load_heavy, office_hours, helped_learn, 
-                 stim_interest, description, last_updated, 
-                 c.course_code, c.name 
+                 stim_interest, description, last_updated
                  FROM review r 
                  INNER JOIN course c on r.course_id = c.cid 
                  INNER JOIN user u ON r.user_id = u.uid 
@@ -215,7 +215,7 @@ def get_review_by_id(conn, rid):
     curs.execute('''select rid, course_id, user_id, difficulty, credit, 
                  prof_name, prof_id, prof_rating, sem, year, take_again, 
                  load_heavy, office_hours, helped_learn, stim_interest, 
-                 description, last_updated from review
+                 description, rating, last_updated from review
                  where rid = %s''', 
                  [rid])
     return curs.fetchone()
@@ -365,3 +365,64 @@ def login_user(conn, email, password):
     else:
         # password incorrect
         return (False, False, False)
+
+def update_review_rating(conn, rid, change):
+    '''
+    Increment or decrement the rating of a review by change.
+
+    param conn: database connection
+    param rid: the review id 
+    param change: +1 or -1 to change the review by 
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''update review 
+                 set rating = rating + %s
+                 WHERE rid = %s''', 
+                 [change, rid])
+    conn.commit()
+
+def get_review_rating(conn, rid):
+    '''
+    Get the current rating of a review.
+    
+    param conn: database connection
+    param rid: review id 
+
+    return: the review's rating
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select rating from review where rid = %s''', 
+                 [rid])
+    return curs.fetchone()['rating']
+
+def has_user_voted(conn, uid, rid):
+    '''
+    Check if the user has already voted on the given review.
+    
+    param conn: database connection
+    param uid: user ID
+    param rid: review ID
+    
+    return: True if the user has voted, False otherwise
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select vote_type 
+                 from user_votes 
+                 where uid = %s and rid = %s''', 
+                 [uid, rid])
+    return curs.fetchone() is not None
+
+def record_user_vote(conn, uid, rid, vote_type):
+    '''
+    Store the user's vote for a review.
+    
+    param conn: database connection
+    param uid: user ID
+    param rid: review ID
+    param vote_type: +1 for upvote, -1 for downvote
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''insert into user_votes (uid, rid, vote_type) 
+                    values (%s, %s, %s)''', 
+                 [uid, rid, vote_type])
+    conn.commit()
