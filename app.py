@@ -116,8 +116,12 @@ def select_department():
                            department = department,
                            departments=departments)
 
-@app.route('/add_course', methods=['GET', 'POST'])
+@app.route('/add_course/', methods=['GET', 'POST'])
 def add_course():
+    if 'uid' not in session: 
+        flash("You must be logged in to add a course")
+        return redirect(url_for('login'))
+    
     conn = dbi.connect()
     departments = db.get_departments(conn)
     if request.method == 'POST':
@@ -211,6 +215,27 @@ def display_course(cid):
         selected_year=selected_year
     )
 
+@app.route('/update_rating/<rid>', methods=['POST'])
+def update_rating(rid):
+    if 'uid' not in session:
+        return jsonify({'success': False, 'message': 'User not logged in'})
+    
+    try:
+        conn = dbi.connect()
+        change = int(request.json['change'])  # +1 for upvote, -1 for downvote
+
+        uid = session['uid']
+        # Check if the user has already voted on this review
+        if db.has_user_voted(conn, uid, rid):
+            return jsonify({'success': False, 'message': 'You have already voted on this review'})
+
+        db.record_user_vote(conn, uid, rid, change)
+
+        db.update_review_rating(conn, rid, change)
+        new_rating = db.get_review_rating(conn, rid)
+        return jsonify({'success': True, 'new_rating': new_rating})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 @app.route('/add_review/<course_code>/<cid>', methods=['GET', 'POST'])
 def add_review(course_code, cid):
@@ -234,6 +259,10 @@ def add_review(course_code, cid):
             'description': request.form.get('description')
         }
 
+        if 'uid' not in session: 
+            flash("You must be logged in to add a review")
+            return redirect(url_for('login'))
+        
         user_id = session.get('uid') # get user id from session 
         int_cid = int(cid)
 
@@ -276,6 +305,11 @@ def add_review(course_code, cid):
 @app.route('/edit_review/<course_code>/<rid>', methods=['GET', 'POST'])
 def edit_review(course_code, rid):
     conn = dbi.connect()
+
+    if 'uid' not in session: 
+        flash("You must be logged in to edit a review")
+        return redirect(url_for('login'))
+    
     # fetch existing review data
     rid = int(rid)
     review = db.get_review_by_id(conn, rid)
@@ -303,12 +337,9 @@ def edit_review(course_code, rid):
             'office_hours': request.form.get('office_hours'),
             'helped_learn': request.form.get('helped_learn'),
             'stim_interest': request.form.get('stim_interest'),
-            'description': request.form.get('description')
+            'description': request.form.get('description'),
+            'rid': rid # store rid 
         }
-
-        updated_data.update({
-            'rid': rid
-        }) 
 
         # update the review in the database
         db.update_review(conn, updated_data)
