@@ -23,6 +23,10 @@ h1 {
     color: var(--color-header);
 }
 
+.navbar-brand{
+    font: 300%;
+}
+
 h2, h3 {
     color: var(--color-header);
 }
@@ -31,7 +35,7 @@ a {
     color: white;
 }
 
-a.course{
+a.course, a.form-group{
     color:#000852;
 }
 
