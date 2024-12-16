@@ -134,7 +134,7 @@ def add_course():
             if len(parts) != 2 or not parts[0].isalpha() or not parts[1].isdigit():
                 raise ValueError  # Raise an error if the format is invalid
             
-             # Capitalize the letter part
+             # capitalize the letter part
             parts[0] = parts[0].upper() 
             course_code = ' '.join(parts)
         except ValueError:
