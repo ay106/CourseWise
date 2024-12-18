@@ -256,12 +256,16 @@ def update_review(conn, updated_data):
 
 def delete_review(conn, rid):
     '''
-    Deletes the review with the given review id.
+    Deletes the review with the given review id and deletes
+    all votes for that review from the user_votes table.
 
     param conn: database connection
     param rid: review id
     '''
     curs = dbi.dict_cursor(conn)
+    # delete rows from user_votes that have the same rid 
+    curs.execute('''delete from user_votes where rid = %s''', 
+                 [rid])
     curs.execute('''delete from review where rid = %s''', 
                  [rid])
     conn.commit()
